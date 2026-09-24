@@ -1,0 +1,703 @@
+# training_config.yaml — the snapshot for sam3-video-cvf.
+#
+# Video analogue of sam3-finetuned-cvf/config_all.yaml. Same contract:
+#   - it is a snapshot, not a resolver; `divergences` records disagreement
+#   - `python -m smokeftv.config_all --check` proves every value equals its
+#     consumer's value, and that check is the contract
+#   - per-run knobs (lr, epochs, freeze schedule, dropout distribution) live in
+#     configs/train_video.yaml and nowhere else
+#   - ckpts/<run>/config_resolved.yaml strips `extends` and is a literal record
+#
+# Rule of thumb: anything that changes WHICH SAMPLES EXIST or WHAT A METRIC
+# MEANS belongs here. Anything a run varies does not.
+
+meta:
+  snapshot_date: 2026-09-24
+  sam3_video_cvf_sha: null          # filled by scripts/stamp_meta.py
+  sam3_finetuned_cvf_sha: 7000faa   # the repo this one is ported from
+  poc_sha: 8a63ee2
+  poc_geometry_sha256: b7b96e719ed072ad
+  poc_config_sha256: f80db0dd8c416439
+  # Image-mode checkpoint the video tracker initialises from. load_overlays
+  # raises on architecture mismatch.
+  # ckpts_best/, not ckpts/ — ckpts/L4E-2 does not exist. 66 tensors, 62.58M
+  # params, all under `backbone.vision_backbone.*` (trunk blocks 28-31 +
+  # sam2_convs 0-2). Verified to load onto build_tracker(with_backbone=True)
+  # with zero unexpected keys and zero shape mismatches, so no key remap.
+  init_from: /home/rileydaggs/projects/sam3-finetuned-cvf/ckpts_best/L4E-2/best.pt
+  # bbox_repair.py is UNTRACKED in sam3-finetuned-cvf, so there is no commit to
+  # name. The eval baseline below was produced by it; hash it instead.
+  bbox_repair_sha256: 022ac4924c2587b4
+
+# --------------------------------------------------------------------------- #
+# shared — ported verbatim; every consumer reads these and they must agree
+# --------------------------------------------------------------------------- #
+shared:
+  data_root: /home/rileydaggs/data/cvf-2026
+  sam_version: sam3
+
+  # CLAHE runs on the FULL FRAME BEFORE the crop is taken. It is a local-contrast
+  # operator; running it on a crop produces different pixels.
+  clahe: true
+  clahe_clip: 2.0
+  clahe_grid: 8
+
+  multimask: true
+  fuse_top_k: 3
+  fuse_mode: soft
+  max_fill_frac: 0.9
+
+# --------------------------------------------------------------------------- #
+# splits — whole cameras held out, not whole incidents. Copied verbatim.
+# --------------------------------------------------------------------------- #
+splits:
+  train_incidents: auto
+
+  val_incidents:
+    - 1022992_ec-242-0_1021975_1022396
+    - 1023953_ec-443-1_457666_460304
+    - 1083899_ec-111-4_1437201_1437454
+    - 1083899_ec-300-0_823607_823860
+    - 1083899_ec-486-1_429282_429536
+    - 1086219_ec-478-4_441956_442102
+    - 1086219_ec-515-1_404688_404833
+    - 1086219_ec-75-3_1884739_1884884
+    - 1138080_ec-400-0_534119_535085
+    - 1173104_ec-395-2_549684_549921    # 2x smoke plume — the two-plume val case
+    - 1176957_ec-357-4_611606_618705
+    - 1214063_ec-311-3_836531_836942
+    - 1664523_ec-138-4_1467441_1467973
+
+  test_incidents:
+    - 1022308_ec-100-4_1488412_1489090
+    - 1022308_ec-164-3_1243865_1244543
+    - 1029713_ec-241-0_1053975_1054375
+    - 1045318_ec-201-1_1193662_1194160
+    - 1056185_ec-449-3_452383_453906
+    - 1065181_ec-430-1_483996_485055
+    - 1065181_ec-437-2_476575_477634
+    - 1065181_ec-437-3_476575_477634
+    - 1083899_ec-223-1_1147452_1147706
+    - 1090875_ec-340-0_699898_699990
+    - 1090875_ec-349-3_648246_648337
+    - 1099811_ec-434-2_496807_497486
+    - 1138080_ec-415-0_521498_522465
+    - 1151608_ec-214-4_1172181_1172356
+    # Present here but NOT under gt_dataset_root. This list and the GT folder
+    # listing are two different things and must not be conflated: this one is a
+    # CAMERA-EXCLUSION list for `train_incidents: auto`, the other is the set
+    # that gets scored. They differ by one name each way today.
+    - 1179436_ec-258-3_1005013_1005094    # in gt_dataset_root, not in cvf-2026;
+                                          # named so `auto` excludes camera
+                                          # ec-258. No labelled ec-258 folder
+                                          # exists yet, so there is no leak
+                                          # today — this is what stops one the
+                                          # day one lands. --check asserts the
+                                          # GT set's cameras are a subset of
+                                          # the held-out cameras.
+    - 1160106_ec-339-4_723141_723325
+    - 1160106_ec-353-0_669795_669979
+    - 1217888_ec-214-4_1190735_1190957
+    - 1662246_ec-331-6_862450_863051
+    - 1664350_ec-481-7_573433_574094
+    - 1664523_ec-131-6_1522075_1522607
+    - 1664523_ec-137-4_1467502_1468034
+    - 1849472_ec-566-2_521498_522604
+    - 318935_ec-95-0_1211472_1211508
+    - 324356_ec-325-2_260561_260670
+    - 328226_ec-95-2_1221265_1221725
+    - 3_279_04042026_ec-279-7_952470_953591
+    - 921196_ec-164-0_1196724_1196907
+
+  gt_dataset_root: /home/rileydaggs/data/segmentation-test-set-new
+
+# --------------------------------------------------------------------------- #
+# masklets — identity assignment. NEW.
+# --------------------------------------------------------------------------- #
+#
+# annotations.json has per-frame boxes with no track ids, and consecutive boxes
+# agree poorly (median IoU 0.731; 7.1% of pairs below 0.3). Identity is derived
+# by the linker ported from smokeft/bbox_event_grouping.py — its union modes are
+# a prompt transform and stay off; its LINKING step is masklet assignment.
+# The event id is the masklet id.
+masklets:
+  link_iou: 0.1
+  link_gap_frac: 0.5
+  max_frame_gap: 5
+  outlier_area_ratio: 8.0
+  # The half-width, in frames, of the LOCAL median `kept()` compares against.
+  # outlier_area_ratio is meaningless without it, and an event-wide median
+  # called 22 of 53 boxes outliers on a plume that grew 928 -> 489,996 px2.
+  # Growth is the signal; only a local spike is an outlier.
+  outlier_window: 5
+  # An event shorter than this is not a trackable object. NOTE: this knob does
+  # not exist in sam3-finetuned-cvf's linker — it is new here, and it gates the
+  # DIAGNOSTIC only (see one_masklet_per_incident).
+  min_event_frames: 4
+
+  # The linker does not produce identities on this corpus. annotations.json
+  # carries <=1 box per frame in 519 of 529 incidents, so >=2 events means the
+  # chain BROKE, not that there are two plumes: 1022992_ec-245-0 returns
+  # [79, 4, 7, 5] (one track plus three stubs) and 1173104_ec-395-2 returns
+  # [10, 28] (a break mid-incident). 45 of 145 train incidents look "multi" this
+  # way and none of them are.
+  # So the masklet is the incident's whole box chain, and the linker runs as a
+  # fragmentation diagnostic in scripts/probe_masklets.py. Flip this to false
+  # only when per-plume masks exist to make identity mean something.
+  one_masklet_per_incident: true
+  # OFF: there is nothing to cross-check against. smokebase_labels.json exists
+  # for 26 of the 28 incidents in segmentation-test-set-new (the HELD-OUT test
+  # set) and for ZERO incidents in cvf-2026, which is what train and val read.
+  # The shipped smokebase_recall metric falls back to a DETECTED point
+  # (vector_back_propogation_from_bbox), one (x, y) per incident — which cannot
+  # cross-check a per-plume base count even where it exists.
+  smokebase_crosscheck: false
+
+# --------------------------------------------------------------------------- #
+# clips — defines the corpus. Moving anything here is a resume tripwire.
+# --------------------------------------------------------------------------- #
+clips:
+  length: 8
+  # Stride so an 8-frame clip spans 30-60 real frames. Consecutive frames of
+  # slowly-evolving smoke is a copy-the-last-mask task.
+  stride: 6
+  stride_jitter: 2
+  # SAM 2 uses 0.5. Reversal inverts the physical prior for a plume growing off
+  # a fixed base. Ablation, not a default.
+  reverse_prob: 0.0
+  # Matches the eval's frame cap: incidents over 60 frames use their first 60
+  # frames of polygon appearance, by frame_index.
+  frame_cap: 60
+  # 1, not 2. There is no two-plume ground truth to put in the second slot:
+  # annotations.json carries <=1 box per frame in 519 of 529 incidents, the
+  # multi-instance frames in polygons.coco.json are wisps of ONE plume (which is
+  # why targets.gt_merge is union), and 1173104_ec-395-2 — the incident whose
+  # status.json says "segmented 2x smoke plume well" — has exactly one box and
+  # one polygon per frame.
+  # loss.exclusion_weight, clips.multi_plume_oversample and
+  # clips.merge_frame_oversample were removed with it, along with the
+  # id_swap_rate / idf1 / fragmentation track metrics. See divergence
+  # `no_two_plume` for what brings them back.
+  max_masklets_per_clip: 1
+
+  # Per-incident stride clamp. At the stride above an 8-frame clip spans 43
+  # frames and only 69 of 144 train incidents are that long, so the configured
+  # value alone discards half the corpus. clips.py uses
+  #   min(stride, max(1, (n_frames - 1) // (length - 1)))
+  # which yields 1268 clip starts across ALL 144 incidents, 69 of them keeping
+  # the full stride-6 span and 12 falling to stride 1. The realised stride is
+  # recorded per clip in clip_manifest.jsonl.
+  stride_clamp_to_fit: true
+  seed: 20260924
+
+# --------------------------------------------------------------------------- #
+# crop — the window fed to the encoder. Read divergences.crop_mode first.
+# --------------------------------------------------------------------------- #
+#
+# full_frame     no crop. Matches stock SAM 3 video. Reference arm.
+# track_window   ONE crop per clip from the union of the track's boxes + pad,
+#                fixed across every frame. Preserves the spatial registration
+#                memory attention assumes, and makes the frozen-backbone feature
+#                cache valid. DEFAULT.
+# per_frame_box  mirrors image mode (compute_window, bbox_pad, squared). Breaks
+#                registration frame to frame. Ablation only.
+crop:
+  mode: track_window
+  # masklet | clip. Which boxes the track_window union is taken over.
+  #
+  # `clip` is 142px tighter at the median (791 vs 933), which is real: both
+  # windows resize to image_size, so a wider one means fewer pixels on the
+  # plume. Measured against image mode's per-frame window (median 384px), the
+  # per-clip window is 1.63x linear / ~2.7x area at the median, p90 2.98x, and
+  # 107 of 712 clips saturate the frame's 1872px short side. That resolution is
+  # the price of spatial registration and it belongs in any report.
+  #
+  # `masklet` wins anyway, for two reasons that beat resolution:
+  #   1. clip membership moves with clips.stride_jitter and the clip start, so a
+  #      per-clip union changes every epoch and the feature cache would be valid
+  #      for exactly one seed.
+  #   2. eval propagates over the whole masklet, so the eval window IS the
+  #      masklet window. Training under clip windows optimises a geometry that
+  #      never occurs at inference.
+  # `clip` is asserted incompatible with a live feature cache at startup.
+  window_scope: masklet
+  image_size: 1008
+  union_pad: 0.35           # track_window only
+  bbox_pad: 0.5             # per_frame_box only — the image repo's value
+  square_infer: true
+  # poc's compute_crop values. Dead under track_window, live in the poc.
+  crop_pad_frac: 0.5
+  crop_pad_top_extra: 0.5
+
+# --------------------------------------------------------------------------- #
+# prompting — the box, and when it is withheld
+# --------------------------------------------------------------------------- #
+prompting:
+  # annotations | detector | mixed.
+  # `detector` is the one that closes the train/test gap: the detector's real
+  # failure modes (one box over both plumes, box on the dense core, drift onto
+  # shadow, misses) are the training signal. Changing this invalidates
+  # comparison with every recorded number.
+  # ONLY `annotations` is implemented. prompting.boxes_for_source raises
+  # NotImplementedError on the other two, naming the dump format they need —
+  # every one of the 529 annotations.json files carries
+  # `box_source: labelbox_*_groundtruth`, and no detector dump exists on disk.
+  # sam3_pred.coco.json is not a substitute: its info block says
+  # `prompt_mode: pvs`, i.e. SAM 3 prompted by the GT box, so its bboxes are
+  # circular. See divergence `detector_prompts`.
+  box_source: annotations
+  detector_boxes_path: null
+  mixed_detector_frac: 0.5
+
+  # The prompt box comes from annotations.json, never from the corrected
+  # polygon's bbox (median IoU between them 0.575: the box sits at the smoke
+  # base, the mask covers the plume). bbox_from_polygon is the narrow exception
+  # and only ever ADDS samples.
+  bbox_propagate_frames:
+    training: 3
+    poc: 1
+    dataclass_default: -1
+  bbox_from_polygon: true
+  bbox_from_polygon_pad: 0.5
+
+  # Prompt transform, OFF. Its linker is reused under masklets: above; its union
+  # modes are a separate experiment (as a blanket transform it buys 2.8 points
+  # of coverage and pays 0.10 of box IoU). Turning it on makes a run
+  # incomparable with anything recorded.
+  bbox_event_grouping:
+    enabled: false
+    mode: window_union
+    link_iou: 0.1
+    link_gap_frac: 0.5
+    max_frame_gap: 5
+    window: 5
+    causal: true
+    ema_alpha: 0.5
+    outlier_area_ratio: 8.0
+    max_area_growth: 8.0
+    fill_span: false
+
+  # Repair a prompt box that fails to contain its own attributed GT. OFF for
+  # training: it reads the GT to rewrite the prompt, so a training run under it
+  # is training on a prompt the detector will never produce.
+  #
+  # It is here because eval arm 1 needs it ON. The recorded acceptance number,
+  # iou_polygon 0.6620960408 in
+  # evaluate/evaluation_runs/09242026_1254_sam3_vs_L4E-2_ordinary, was produced
+  # by `show_baseline.py --ckpt ckpts_best/L4E-2/best.pt experiment ordinary
+  # --set data.bbox_repair.enabled=true`. Without the flag the same weights give
+  # 0.6577468796. A 0.004 gap is the same size as a real port bug, which is why
+  # this section exists rather than the target being requoted.
+  bbox_repair:
+    enabled: false
+    tol_px: 2.0             # already-contained within this many px is a no-op
+    pad_frac: 0.5           # growth after unioning, split evenly across sides
+    max_area_frac: 0.25     # beyond this the label is broken; flag, don't grow
+
+  # OFF. `source: prediction` invalidates the feature cache; assert at startup.
+  # At bands 10 / band 1 this fires on 90% of prompts, i.e. it is close to a
+  # constant directional pad rather than a trigger. bands is the selectivity
+  # knob; 50 is where it starts behaving like one.
+  bbox_boundary_extend:
+    enabled: false
+    source: polygon           # polygon | prediction
+    bands: 10
+    left:   {band: 1, pad: 0.25}
+    top:    {band: 1, pad: 0.25}
+    right:  {band: 1, pad: 0.25}
+    bottom: {band: 0, pad: 0.0}
+
+# --------------------------------------------------------------------------- #
+# memory — bank composition. See HANDOFF.md 3.3 before changing anything.
+# --------------------------------------------------------------------------- #
+memory:
+  # SAM 3 calls this num_maskmem and it is max_recent_frames + 1 = 7: the FIFO
+  # loop is `for t_pos in range(1, num_maskmem)`, so 7 gives 6 recency slots.
+  # maskmem_tpos_enc is sized (num_maskmem, 1, 1, mem_dim) at construction, so
+  # this must be set before any forward.
+  max_recent_frames: 6
+  # INERT under prompted_frames_are_conditioning: false. With one conditioning
+  # frame, select_closest_cond_frames short-circuits and returns it. Kept for
+  # the re-init ablation, where explicit re-inits make n_cond > 1; the startup
+  # log says so rather than leaving a reader to assume it did something.
+  # (Upstream's build_tracker default is 4.)
+  max_cond_frames_in_attn: 2
+  # FALSE is the whole point. If a mid-clip prompted frame is classified as
+  # conditioning, per-frame prompting makes EVERY frame conditioning: the cap
+  # saturates, the recency FIFO is evicted, and the module runs far outside its
+  # pretrained regime. At false, prompted frames enter the recency FIFO with
+  # temporal encoding; only frame 0 and explicit re-inits are conditioning.
+  prompted_frames_are_conditioning: false
+  keep_first_cond_frame: true   # also inert at n_cond == 1; upstream default
+                                # is false and build_tracker never passes it
+  # These two have NO switch on Sam3TrackerBase. obj_ptr_proj,
+  # obj_ptr_tpos_proj and maskmem_tpos_enc are built unconditionally;
+  # `use_obj_ptrs_in_encoder` / `add_tpos_enc_to_obj_ptrs` exist only on the
+  # sam3.1 multiplex path, and shared.sam_version is sam3. They are recorded as
+  # ASSERTIONS about the vendored source, which --check verifies — not as knobs.
+  # Setting either false raises rather than silently doing nothing.
+  temporal_pos_encoding: true
+  object_pointers: true
+  # Log n_cond / n_recent on batch 0 of every run.
+  log_bank_composition: true
+
+# --------------------------------------------------------------------------- #
+# targets — ported
+# --------------------------------------------------------------------------- #
+targets:
+  gt_merge: union
+  min_mask_pixels: 16
+
+# --------------------------------------------------------------------------- #
+# loss — weights that define what is being optimised, not how hard
+# --------------------------------------------------------------------------- #
+# dice/bce/iou_head at 1.0 is L4E-2's recipe, read off its own
+# config_resolved.yaml. An earlier draft of this file carried SAM 2's video
+# recipe (focal 20.0); nothing that produced a recorded number used it, and the
+# loss SCALE is what makes train.lr transferable between the image arm and this
+# one. smokeft/losses.py is ported verbatim rather than reusing
+# sam3/train/loss/loss_fns.py, whose dice divides by num_boxes, whose focal
+# defaults to a Triton kernel, and whose iou_loss lacks the empty-vs-empty -> 1.0
+# convention that smoke masklets hit on every not-yet-visible frame.
+loss:
+  dice_weight: 1.0
+  bce_weight: 1.0
+  iou_head_weight: 1.0
+  # Phase B. sam_mask_decoder.pred_obj_score_head is frozen in Phase A, so
+  # supervising presence there is a no-op on a tensor with no gradient.
+  presence_weight: 0.0
+  # 0.0: there are no hand-placed smoke-base labels for the training corpus.
+  # smokebase_labels.json exists for 26 of the 28 incidents under
+  # splits.gt_dataset_root — the HELD-OUT test set — and for zero incidents
+  # under shared.data_root. smokebase_recall stays in eval_video.frame_metrics:
+  # it is computable on the GT set, and it is a metric, not a loss.
+  # See divergence `no_smokebase`.
+  smokebase_weight: 0.0
+  smokebase_radius_px: 5
+  # Can suppress real plume growth. Ablation only; any report that turns it on
+  # has to say so.
+  temporal_consistency_weight: 0.0
+
+# --------------------------------------------------------------------------- #
+# postprocess — logits to a stored polygon. Ported verbatim, pinned not env.
+# Changing any value here invalidates every recorded number simultaneously.
+# --------------------------------------------------------------------------- #
+postprocess:
+  top_k: 3
+  max_fill_frac: 0.9
+  logit_threshold: 0.0
+  close_kernel: 3
+  fill_holes: false
+  erode_px: 0
+  keep_largest: true
+  min_component_frac: 0.0
+  smooth_sigma: 2.0
+  simplify_eps: 1.5
+  min_polygon_points: 3
+  min_polygon_area: 8.0
+  polygon_smooth_iters: 2
+
+# --------------------------------------------------------------------------- #
+# eval_video — three arms, always reported together
+# --------------------------------------------------------------------------- #
+eval_video:
+  surfaces: [fused, polygon]
+  frame_cap: 60
+  worst_frame_metric: iou_polygon
+  per_incident: true
+  image_size: 1008
+  results_root: evaluate/evaluation_runs
+  poc_root: /home/rileydaggs/projects/smoke-segmentation-poc/poc
+  # Arm 1. iou_polygon on this checkpoint must reproduce to 4dp or the
+  # postprocess port is wrong.
+  baseline_arm: /home/rileydaggs/projects/sam3-finetuned-cvf/ckpts_best/L4E-2
+  # The exact target, from that run's run.json rather than the rounded table.
+  # Scored over the 1412 samples left after frame_cap, across 27 incidents,
+  # under ckpts_best/L4E-2/config_resolved.yaml AND
+  # prompting.bbox_repair.enabled: true. Uncapped the same run is 0.6449737879
+  # over 2548 samples; do not quote the two interchangeably.
+  baseline_iou_polygon: 0.6620960408
+  baseline_iou_fused:   0.6740399427
+  baseline_samples_capped: 1412
+  baseline_samples_uncapped: 2548
+  baseline_incidents: 27
+
+  inference_modes: [prompt_every_frame, keyframe, conditional]
+  keyframe_every: 8
+  # conditional: propagate by default, re-prompt when the propagated mask's
+  # bbox disagrees with the detector box below this, keyframe_every as a floor.
+  # This is the shippable arm and the regime the dropout trains for.
+  conditional_reprompt_iou: 0.5
+
+  # recall/prec are qualified by surface. frames.csv carries four columns —
+  # prec_fused, recall_fused, prec_polygon, recall_polygon — and the reference
+  # report reads both off the POLYGON surface, because mixing surfaces inside
+  # one row makes the row mean nothing. Bare `recall` names no column.
+  frame_metrics: [iou_fused, iou_polygon, iou_selected, iou_best,
+                  recall_polygon, prec_polygon, smokebase_recall]
+  # id_swap_rate, idf1 and fragmentation are gone: all three compare predicted
+  # track A against GT track B, and there is no GT track B anywhere in this
+  # corpus. Mining status.json's smoke_descriptors finds 6 multi-plume incidents
+  # in total, and holding out whole cameras leaves exactly one in train — whose
+  # descriptor is "split into two by tower", i.e. one plume behind an occluder.
+  # The handoff is right that id_swap_rate is what replaces `restarts` in video
+  # mode; it is simply not computable yet. See divergence `no_two_plume`.
+  track_metrics: [continuity, restarts]
+
+# --------------------------------------------------------------------------- #
+# run — the logs/ckpts contract
+# --------------------------------------------------------------------------- #
+run:
+  logs_root: logs
+  ckpts_root: ckpts
+  # stdout: resolve run_name from readlink /proc/self/fd/1, so ckpts/<run>/ and
+  # logs/<run>.log always share a name. timestamp: fall back when stdout is a tty.
+  run_name_from: stdout
+  require_clean_git: true
+  save_clip_manifest: true
+  save_prompt_schedule: true
+  keep_checkpoints: [best, last]
+  # NOT under /home: that filesystem is 100% full (22G free on 14T). logs/ and
+  # ckpts/ are symlinks into the same place for the same reason. The cache is
+  # ~10.1 MiB/frame in bf16 -> ~57 GiB for the 5777 capped train+val frames,
+  # and it is only valid while the backbone is frozen AND crop.mode is
+  # track_window with window_scope: masklet.
+  feature_cache_root: /data3/rileydaggs/sam3-video-cvf/cache
+
+# --------------------------------------------------------------------------- #
+# poc — GUI-side knobs, ported
+# --------------------------------------------------------------------------- #
+poc:
+  prompt_mode: pvs
+  confidence_threshold: 0.35
+  enable_points: true
+  enable_neg_points: false
+  max_gap_px: 12
+  bridge_gap_px: 6
+  merge_instances: true
+  fallback_score_min: 0.05
+  gamma_boost: 1.6
+
+poc_field_map:
+  dataset_root: shared.data_root
+  sam_version: shared.sam_version
+  preprocess_clahe: shared.clahe
+  clahe_clip: shared.clahe_clip
+  clahe_grid: shared.clahe_grid
+  mask_combine_top_k: shared.fuse_top_k
+  mask_combine_mode: shared.fuse_mode
+  max_fill_frac: shared.max_fill_frac
+  crop_pad_frac: crop.crop_pad_frac
+  crop_pad_top_extra: crop.crop_pad_top_extra
+  bbox_propagate_frames: prompting.bbox_propagate_frames.poc
+  mask_logit_threshold: postprocess.logit_threshold
+  mask_close_kernel: postprocess.close_kernel
+  mask_fill_holes: postprocess.fill_holes
+  mask_erode_px: postprocess.erode_px
+  mask_keep_largest: postprocess.keep_largest
+  mask_min_component_frac: postprocess.min_component_frac
+  mask_smooth_sigma: postprocess.smooth_sigma
+  polygon_simplify_eps: postprocess.simplify_eps
+  min_polygon_points: postprocess.min_polygon_points
+  min_polygon_area: postprocess.min_polygon_area
+  polygon_smooth_iters: postprocess.polygon_smooth_iters
+  prompt_mode: poc.prompt_mode
+  confidence_threshold: poc.confidence_threshold
+  enable_points: poc.enable_points
+  enable_neg_points: poc.enable_neg_points
+  max_gap_px: poc.max_gap_px
+  bridge_gap_px: poc.bridge_gap_px
+  merge_instances: poc.merge_instances
+  fallback_score_min: poc.fallback_score_min
+  gamma_boost: poc.gamma_boost
+
+# --------------------------------------------------------------------------- #
+# divergences — known disagreements, recorded on purpose. --check asserts each
+# still holds; converging one is an experiment with a number attached.
+# --------------------------------------------------------------------------- #
+divergences:
+  - id: no_two_plume
+    severity: high
+    what: >
+      Two-plume identity separation — goal (2) of the experiment — is out of
+      scope, because there is no ground truth for it.
+      clips.max_masklets_per_clip is 1, loss.exclusion_weight,
+      clips.multi_plume_oversample and clips.merge_frame_oversample are deleted,
+      and eval_video.track_metrics has lost id_swap_rate, idf1 and
+      fragmentation.
+    why_it_matters: >
+      annotations.json carries at most one box per frame in 519 of 529
+      incidents. The frames where polygons.coco.json holds several instances are
+      wisps of one drifting plume, not identities — 1022992_ec-242-0 frame 86 is
+      one 645x50 box beside four slivers and the count flickers 5-1-3-1 across
+      consecutive frames — which is exactly why targets.gt_merge is union.
+      1173104_ec-395-2, whose status.json reads "segmented 2x smoke plume well",
+      has one box and one polygon per frame. Mining smoke_descriptors over the
+      corpus finds six multi-plume incidents; camera hold-out leaves one in
+      train, described as "split into two by tower".
+    not_resolved_here: >
+      Per-plume masks have to be labelled first. Until then exclusion_weight
+      would never fire and id_swap_rate has no second track to swap with, so
+      carrying the keys would be config for code that cannot run.
+
+  - id: detector_prompts
+    severity: high
+    what: >
+      prompting.box_source is annotations, and detector / mixed raise
+      NotImplementedError naming the dump format they need.
+    why_it_matters: >
+      The handoff calls `detector` the run that matters, and it is right:
+      GT-derived boxes at train time against detector boxes at test time is a
+      distribution gap the image model was only spared because it never learned
+      to lean on the box. The detector's real failure modes are the training
+      signal.
+    not_resolved_here: >
+      No detector dump exists. All 529 annotations.json carry
+      box_source: labelbox_*_groundtruth, and sam3_pred.coco.json is not a
+      substitute — prompt_mode: pvs means SAM 3 prompted by the GT box, so its
+      boxes are circular. Producing the dump is a separate job.
+
+  - id: no_smokebase
+    severity: medium
+    what: >
+      loss.smokebase_weight is 0.0 and masklets.smokebase_crosscheck is false.
+    why_it_matters: >
+      The base is stationary and physically anchored, which does make it the
+      thing memory can latch onto while the upper plume churns, and
+      smokebase_recall is already a shipped metric (+0.073 on L4E-2).
+    not_resolved_here: >
+      smokebase_labels.json exists for 26 of the 28 incidents under
+      splits.gt_dataset_root and for ZERO incidents under shared.data_root. The
+      only labels are on the set that gets reported against, so weighting them
+      would train on the test set. The detected fallback
+      (vector_back_propogation_from_bbox) is one point per incident, derived
+      from the same boxes the model is prompted with.
+
+  - id: bbox_repair_for_baseline
+    severity: medium
+    what: >
+      prompting.bbox_repair is off, but eval arm 1 turns it on to reproduce
+      eval_video.baseline_iou_polygon.
+    why_it_matters: >
+      The recorded 0.6620960408 was produced with
+      data.bbox_repair.enabled=true; the same weights without it give
+      0.6577468796. A 0.0044 gap is the same size as a real port bug, so an arm
+      that quietly ran without it would look like a broken postprocess port.
+      Worse, the image repo's master_baseline.cache_key omits bbox_repair, so
+      both numbers were written into the same cache slot 2b42c6855af0cebe.
+    not_resolved_here: >
+      It reads the GT to rewrite the prompt, so it cannot be on during training
+      without teaching the model a prompt no detector produces. Off for train,
+      on for the baseline arm, and this repo's cache key covers it.
+
+  - id: fuse_fill_frac
+    severity: medium
+    what: >
+      metrics.all_ious calls fuse_soft WITHOUT max_fill_frac, so the
+      degenerate-candidate filter reaches the polygon surface and not the fused
+      one. Ported verbatim rather than fixed.
+    why_it_matters: >
+      shared.max_fill_frac reads as if it governs both surfaces and it governs
+      one. poc_drift already flags it, and postprocess.logit_threshold is dead
+      the same way — fuse_soft and hard_iou both binarise at logit 0.0.
+    not_resolved_here: >
+      Fixing it moves iou_fused off the recorded 0.6740399427, which is the
+      number every comparison in this repo is anchored to. Fix it and
+      re-measure, in that order.
+
+  - id: memory_conditioning
+    severity: high
+    what: >
+      memory.prompted_frames_are_conditioning is false, against upstream, which
+      hardcodes `self.add_all_frames_to_correct_as_cond = True` in
+      Sam3TrackerPredictor.__init__ and does not expose it as a constructor arg.
+    why_it_matters: >
+      Prompting every frame under upstream's rule makes EVERY frame a
+      conditioning frame: max_cond_frames_in_attn saturates, the recency FIFO is
+      evicted, and the module runs far outside its pretrained regime. A
+      conditioning frame also has its temporal position encoding forced to slot
+      0, so it loses its temporal identity entirely.
+    not_resolved_here: >
+      Not resolvable upstream-side. The differentiable path cannot use
+      Sam3TrackerPredictor at all — every entry point is decorated
+      @torch.inference_mode(), and propagate_in_video_preflight re-files
+      everything by storage_key and clears non-cond memory around each prompted
+      frame. This repo drives track_step directly and owns its output_dict, so
+      the classification is one line it controls.
+
+  - id: test_split_is_not_the_gt_set
+    severity: medium
+    what: >
+      splits.test_incidents and the folder listing of splits.gt_dataset_root are
+      two different 27-name lists. This one has
+      1151608_ec-214-4_1172181_1172356; the GT set has
+      1179436_ec-258-3_1005013_1005094. Both are named here.
+    why_it_matters: >
+      This list is a CAMERA-EXCLUSION list for train_incidents: auto; the other
+      is what gets scored. Conflating them is how a run trains on cameras it is
+      later reported against — the image repo trained on 8 test incidents before
+      its equivalent list existed.
+    not_resolved_here: >
+      They are not meant to be equal. camera ec-258 has no labelled cvf-2026
+      folder today, so nothing leaks; naming it is what keeps that true the day
+      one lands. --check asserts the GT set's cameras are a subset of the
+      held-out cameras.
+
+  - id: crop_mode
+    severity: high
+    what: >
+      Video training uses crop.mode track_window — one fixed crop per clip. The
+      image repo uses compute_window (per-frame, squared, bbox_pad 0.5) and the
+      poc uses compute_crop (per-dimension, extra headroom above the box). Three
+      windows.
+    why_it_matters: >
+      Per-frame windows put the memory bank in a different coordinate frame than
+      the current frame's features, so memory cross-attention has to undo an
+      arbitrary transform it was never trained for. That is why video defaults
+      to a fixed window. But iou_polygon is supposed to be the surface the GUI
+      ships, and the GUI now segments a third window shape. Any cross-repo
+      comparison is a comparison across windows until this is converged.
+    not_resolved_here: >
+      Converging it means serve.py adopts track_window, which changes the
+      product. Do that as a measurement with a paired report, after the video
+      arm has a number.
+
+  - id: windowing_inherited
+    severity: high
+    what: >
+      The image repo's compute_window vs the poc's compute_crop disagreement,
+      inherited unchanged. surfaces.poc_drift compares crop_pad_frac and
+      crop_pad_top_extra, which the finetune no longer reads, so the existing
+      drift check reports clean on the exact axis where they differ.
+    not_resolved_here: >
+      Every image-mode number since 2026-08-21 was taken under the square window,
+      including the encoder ladder's epoch-0 bar (iou_fused 0.6945 /
+      iou_polygon 0.7129).
+
+  - id: bbox_propagate
+    severity: medium
+    what: >
+      Three values for how far a prompt box carries forward: training 3, poc 1,
+      dataclass default -1.
+    why_it_matters: >
+      It decides corpus size (4126 samples at -1 against 3826 at 3) and now also
+      clip count, which is a resume tripwire in two places instead of one.
+    not_resolved_here: >
+      -1 is the prompt the labeler actually drew under and staleness barely
+      registers (IoU(prompt, polygon bbox) 0.575 at gap 0 against 0.551 at gap
+      11+), but changing it changes the dataset and invalidates comparison with
+      every recorded run.
+
+  - id: frame_cap
+    severity: low
+    what: >
+      clips.frame_cap 60 matches the eval's cap, so training and scoring see the
+      same horizon. The poc has no cap and runs whole incidents.
+    why_it_matters: >
+      Incidents well over 60 frames (3_279_04042026_ec-279-7 at 373,
+      1664523_ec-137-4 at 60+, 328226_ec-95-2 at 165) train and score on their
+      first 60 frames only. Long-horizon memory behaviour past that point is
+      untested by construction.
+    not_resolved_here: >
+      Raising it is a cost question, not a correctness one. Measure it after
+      Phase A.

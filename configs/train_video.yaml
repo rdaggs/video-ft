@@ -1,0 +1,164 @@
+# configs/train_video.yaml — Phase A: train the memory path, freeze everything
+# the image arm already fit.
+#
+# **The data spec, the masklet linker, the clip corpus, the crop mode, the
+# prompt geometry, the memory bank composition, the loss weights, the
+# postprocess chain and the logs/ckpts contract are not in this file** — they
+# come from ../training_config.yaml via `extends` below, because the eval
+# pipeline and the poc's GUI have to agree with this run about them.
+#
+#   python -m smokeftv.config_all --show     what is inherited
+#   python -m smokeftv.config_all --check    proof it is still true
+#
+# --check fails if any key here is ALSO supplied by the snapshot. One value, one
+# place: the config wins the merge, so a duplicated key leaves a number in the
+# snapshot that nobody reads and that still looks authoritative.
+#
+# `run_name` is absent on purpose. train.sh resolves it from its own stdout and
+# passes --run-name, so ckpts/<run>/ and logs/<run>.log cannot drift apart.
+#
+# Sweep with dotted overrides rather than by editing this file:
+#   ./train.sh --gpu 7 --tag A-lr3e-5 train.lr=3e-5 > logs/...
+
+extends: ../training_config.yaml
+
+seed: 0
+device: cuda
+
+model:
+  # sam_version, multimask and the whole memory: block are inherited.
+  checkpoint: null
+
+  # --- Phase A freeze policy ------------------------------------------- #
+  # The trunk and the mask decoder are L4E-2's, unchanged. This run asks one
+  # question — does the memory path learn smoke — and unfreezing anything the
+  # image arm already trained would confound the answer with that arm's gains.
+  #
+  # It is also what the image repo's encoder ladder argues for: trainable
+  # capacity came out INVERSELY related to val IoU there (last:4 at ~62M was
+  # best; ~229M and ~457M never beat epoch 0, with bce climbing while dice
+  # stayed flat). Phase A is 7.52M against ~1268 clips, which is a far healthier
+  # ratio than any rung of that ladder.
+  #
+  # The frozen trunk is also what makes the feature cache valid: at a fixed
+  # per-masklet track_window the backbone output for a frame never changes, so
+  # the encoder runs once per frame per corpus instead of once per epoch.
+  train_mask_decoder: false
+  train_prompt_encoder: false
+
+  # Force 3 candidates on EVERY frame. Under SAM 3's stock
+  # multimask_min_pt_num=0 / max_pt_num=1 a box is two points, so `_use_multimask`
+  # returns False on prompted frames and True on dropout frames — one candidate
+  # against three, with different object-pointer token semantics between them.
+  # That would make the memory stream inconsistent frame to frame and would make
+  # the fused surface mean two different things inside one clip.
+  multimask_mode: always
+
+  # .train() turns on 0.1 dropout across all four memory-attention layers
+  # (16 nn.Dropout + 8 RoPEAttention). Train mode is still required — in eval
+  # mode the mask is hard-binarised before the memory encoder, which is zero
+  # gradient — so the dropout is switched off by hand instead.
+  memory_attn_dropout: 0.0
+
+  # Take object-presence from the GT rather than the frozen head. When
+  # object_score_logits <= 0 the mask becomes a constant -1024 with exactly zero
+  # gradient and that frame's memory is poisoned — a silent stall that reads as
+  # "the loss plateaued". Phase B trains the head and turns this off.
+  force_obj_appearing: true
+
+  # Which candidate reaches the memory encoder. Stock hands it the IoU head's
+  # pick, which disagrees with the candidate the loss supervises while that head
+  # is frozen and uncalibrated on smoke.
+  mem_mask_source: supervised_best
+
+  grad_checkpoint_memory_attn: false
+
+  memory:
+    # Named slices of the tracker; see config.MEMORY_MODULES. Everything that
+    # exists only in video mode and nothing that does not:
+    #   attention  the memory cross-attention encoder  5.92M
+    #   encoder    maskmem_backbone, which writes the bank  1.38M
+    #   pointers   obj_ptr_proj + obj_ptr_tpos_proj  0.21M
+    #   mask_down  mask_downsample, the 4x mask-prompt stem
+    # plus the five bare token Parameters. 7.52M trainable in total.
+    train: [attention, encoder, pointers, mask_down]
+    # null keeps the whole 8-frame clip in one autograd graph. The clip is a
+    # recurrence, not 8 independent frames, so activation memory sums over all
+    # of them — ~4-5 GB at batch 1, which fits. Set an int only if that stops
+    # being true; it changes what the memory encoder learns.
+    truncate_bptt: null
+
+train:
+  epochs: 8
+  # One clip is 8 frames through the tracker. The rollout is a sequential
+  # recurrence with a per-clip dropout pattern, so clips are not batched in the
+  # model's B dimension — batching them would force a shared dropout draw across
+  # the batch, which is the opposite of what p ~ U(p_min, p_max) is for.
+  # Scale with grad_accum and ranks instead.
+  batch_size: 1
+  grad_accum: 2
+
+  # 1e-4, not L4E-2's 1e-5. The memory modules are pretrained on SA-V and are
+  # being asked to move to a new object class; 1e-5 was chosen for a decoder
+  # already close to its answer on this data. Sweep this first.
+  lr: 1.0e-4
+  lr_schedule: cosine
+  lr_warmup_frac: 0.05
+  lr_min_factor: 0.0
+
+  # Four groups. Only `memory` is non-empty under this freeze policy; the other
+  # three are stated so a later phase changes one line rather than three.
+  memory_lr_scale: 1.0
+  decoder_lr_scale: 0.1
+  encoder_lr_scale: 0.01
+
+  weight_decay: 0.05
+  grad_clip: 1.0
+  amp_dtype: bfloat16
+
+  num_workers: 8
+  # `sequential` means every batch comes from one incident; the image repo
+  # measured val iou_fused 0.5569 -> 0.4548 in a single epoch under it.
+  clip_policy: shuffle
+  loss_size: 1008
+  log_every: 50
+  eval_every: 1
+
+  # iou_polygon is the surface the GUI ships. iou_fused and iou_polygon have
+  # disagreed on the SIGN of a change, so selecting on the proxy can ship the
+  # wrong epoch.
+  eval_polygon: true
+  select_metric: iou_polygon
+
+  # Which arm the in-training val pass runs. `conditional` is the shippable one
+  # and the regime the dropout below trains for; the other two are scored by
+  # scripts/eval_video.py after the run, not during it.
+  inference_mode: conditional
+
+  init_ckpt: null      # meta.init_from is applied by scripts/train.py
+  resume: null
+  save_resume: true
+
+  # --- prompt dropout ---------------------------------------------------- #
+  # p is a KEEP rate, drawn once per clip and then applied per frame. Frame 0 is
+  # never dropped: it is the conditioning frame, and a clip with no prompt has
+  # nothing to track.
+  #
+  # At U(0.3, 0.9), measured over 200k simulated clips: 35% of frames
+  # unprompted, mean longest unprompted run 1.95, p90 4 — so memory has to carry
+  # the object for up to four consecutive frames in 10% of clips, while 9% of
+  # clips stay fully prompted and still show the model the inference regime.
+  # U(0.5, 1.0) leaves 25% of clips fully prompted and a p90 gap of 3, which is
+  # the gentler arm if this one does not converge.
+  #
+  # Warmup keeps the signal dense while the memory modules are moving fastest.
+  dropout:
+    p_min: 0.3
+    p_max: 0.9
+    warmup_epochs: 1
+
+feature_cache:
+  # Off for the first runs: the smoke test has to prove the model trains before
+  # a cache can be blamed for it not training. Turning it on asserts the
+  # backbone is frozen, crop.mode is track_window and window_scope is masklet.
+  enabled: false

@@ -7,6 +7,5 @@ __pycache__/
 # ckpts/ and logs/ are symlinks into /data3 — the root filesystem is full.
 # Their contents are run artifacts, not source.
 /ckpts
-/logs
 /.venv
 /cache

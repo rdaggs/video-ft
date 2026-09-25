@@ -28,6 +28,10 @@ from smokeftv.config import load_config, save_config            # noqa: E402
 from smokeftv.corpus import build_clips                         # noqa: E402
 from smokeftv.prompting import frame_keep_mask, schedule_row    # noqa: E402
 
+# What engine.run_epoch returns. iou_best is the GT-picked candidate: an oracle,
+# logged so the gap to iou_fused stays visible, never a sensible selector.
+VAL_METRICS = ("iou_fused", "iou_selected", "iou_best")
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -70,6 +74,13 @@ def main() -> int:
             "at logs/<run>.log; writing elsewhere would leave a run directory "
             "whose log points at another run. Fix run.ckpts_root, or the "
             "launcher.")
+    # Here and not in config.py: eval_video loads older runs' resolved configs,
+    # which say iou_polygon, and those must stay loadable.
+    if cfg.train.select_metric not in VAL_METRICS:
+        raise SystemExit(
+            f"train.select_metric is {cfg.train.select_metric!r} but the val "
+            f"pass computes only {list(VAL_METRICS)}; best.pt would be selected "
+            "on a number that is never measured.")
 
     log = runlog.setup_logging(run_dir)
     seed_everything(cfg.seed)
@@ -258,7 +269,8 @@ def main() -> int:
 
     def record(split, epoch, stats, lr):
         row = {"epoch": epoch, "split": split, "t_utc": runlog.utcnow(), "lr": lr,
-               "loss": round(stats["loss"], 5), "iou_fused": round(stats["iou"], 5),
+               "loss": round(stats["loss"], 5),
+               **{m: round(stats[m], 5) for m in VAL_METRICS},
                "clips": stats["clips"], "secs": stats["secs"],
                "zero_grad_frames": stats["zero_grad_frames"]}
         metrics.write({**row, "iou_by_t": [round(v, 4) for v in stats["iou_by_t"]],
@@ -276,11 +288,11 @@ def main() -> int:
                           criterion=criterion, log_every=cfg.train.log_every,
                           probe_first=cfg.model.memory.log_bank_composition)
         record("val", 0, stats, cfg.train.lr)
-        log.info("  val e0  loss %.4f iou %.4f  by_t %s  by_kind %s",
-                 stats["loss"], stats["iou"],
+        log.info("  val e0  loss %.4f iou_fused %.4f (best-of-3 %.4f)  by_t %s  "
+                 "by_kind %s", stats["loss"], stats["iou"], stats["iou_best"],
                  [round(v, 3) for v in stats["iou_by_t"]],
                  {k: round(v, 3) for k, v in stats["iou_by_kind"].items() if v == v})
-        best_score = stats["iou"]
+        best_score = stats[select]
         best_epoch = 0
 
     for epoch in range(start_epoch, cfg.train.epochs + 1):
@@ -298,7 +310,7 @@ def main() -> int:
                           train=True, probe_first=epoch == start_epoch and
                           cfg.model.memory.log_bank_composition)
         record("train", epoch, stats, lr)
-        log.info("train e%d  loss %.4f iou %.4f  %.0fs  zero-grad frames %d",
+        log.info("train e%d  loss %.4f iou_fused %.4f  %.0fs  zero-grad frames %d",
                  epoch, stats["loss"], stats["iou"], stats["secs"],
                  stats["zero_grad_frames"])
 
@@ -309,17 +321,18 @@ def main() -> int:
                                    train=False, criterion=criterion,
                                    log_every=cfg.train.log_every)
             record("val", epoch, vstats, lr)
-            log.info("  val e%d  loss %.4f iou %.4f  by_t %s  by_kind %s",
-                     epoch, vstats["loss"], vstats["iou"],
+            log.info("  val e%d  loss %.4f iou_fused %.4f (best-of-3 %.4f)  "
+                     "by_t %s  by_kind %s",
+                     epoch, vstats["loss"], vstats["iou"], vstats["iou_best"],
                      [round(v, 3) for v in vstats["iou_by_t"]],
                      {k: round(v, 3) for k, v in vstats["iou_by_kind"].items()
                       if v == v})
-            if vstats["iou"] > best_score:
-                best_score, best_epoch = vstats["iou"], epoch
+            if vstats[select] > best_score:
+                best_score, best_epoch = vstats[select], epoch
                 ckpt.save(run_dir / "best.pt", tracker,
                           {"epoch": epoch, "run_name": cfg.run_name,
-                           "select_metric": select, "iou_fused": vstats["iou"]})
-                log.info("  new best %.4f -> best.pt", best_score)
+                           "select_metric": select, select: best_score})
+                log.info("  new best %s %.4f -> best.pt", select, best_score)
 
         # last.pt and last_resume.pt back to back, so the two halves always
         # describe the same epoch. A resume that restored epoch N's optimizer

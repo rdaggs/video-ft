@@ -53,7 +53,11 @@ from smokeftv.incidents import camera_of                        # noqa: E402
 
 SCHEMA = 1
 INIT_ARM = "init"
-T_METRIC = "iou_polygon"
+# The surface every per-t / per-kind / per-incident / worst-frame table ranks
+# on. "fused" matches what train.py logs and selects best.pt on; "polygon" is
+# the GUI's full-frame surface. Both stay in frames.csv and the headline.
+SURFACE = "fused"
+T_METRIC = f"iou_{SURFACE}"
 HEADLINE_MODE = "conditional"
 KINDS = ("cond", "prompted", "propagated")
 
@@ -175,6 +179,11 @@ def summarize(rows: list[dict], modes) -> dict:
     return out
 
 
+def _worst_key(row: dict) -> tuple[float, float]:
+    """Lowest IoU first, ties to the biggest GT plume."""
+    return float(row[T_METRIC]), -float(row[f"gt_px_{SURFACE}"])
+
+
 def incident_rows(rows: list[dict], modes) -> list[dict]:
     out = []
     for mode in modes:
@@ -183,18 +192,17 @@ def incident_rows(rows: list[dict], modes) -> list[dict]:
             if row["mode"] == mode:
                 by_incident.setdefault(row["incident"], []).append(row)
         for incident, group in sorted(by_incident.items()):
-            worst = min(group, key=lambda r: (float(r[T_METRIC]),
-                                              -float(r["gt_px_polygon"])))
+            worst = min(group, key=_worst_key)
             record = {"mode": mode, "incident": incident,
                       "camera": camera_of(incident), "n": len(group),
                       "clips": len({r["clip_id"] for r in group})}
             for field in MEAN_FIELDS:
                 record[field] = round(_mean(group, field), 6)
-            record["median_iou_polygon"] = round(statistics.median(
-                _floats(group, "iou_polygon")), 6)
+            record[f"median_{T_METRIC}"] = round(statistics.median(
+                _floats(group, T_METRIC)), 6)
             record["worst_frame"] = int(worst["frame_index"])
             record["worst_t"] = int(worst["t"])
-            record["worst_iou_polygon"] = round(float(worst[T_METRIC]), 6)
+            record[f"worst_{T_METRIC}"] = round(float(worst[T_METRIC]), 6)
             out.append(record)
     return out
 
@@ -236,12 +244,15 @@ def render_report(manifest: dict, arm_rows: dict[str, list[dict]]) -> str:
             delta = {m: None if name == base or b.get(m) is None else s[m] - b[m]
                      for m in ("iou_polygon", "iou_fused")}
             head.append([name + (" (baseline)" if name == base else ""), mode,
-                         fmt(s["iou_polygon"]), fmt(delta["iou_polygon"], "+.4f"),
                          fmt(s["iou_fused"]), fmt(delta["iou_fused"], "+.4f"),
-                         fmt(s["prec_polygon"]), fmt(s["recall_polygon"])])
-    lines += ["", "HEADLINE  (mean over (clip, t) samples)",
-              render_table(["arm", "mode", "IoU polygon", "delta", "IoU fused",
-                            "delta", "prec poly", "recall poly"], head)]
+                         fmt(s["prec_fused"]), fmt(s["recall_fused"]),
+                         fmt(s["iou_polygon"]), fmt(delta["iou_polygon"], "+.4f"),
+                         fmt(s["iou_best"])])
+    lines += ["", "HEADLINE  (mean over (clip, t) samples; best-of-3 is the "
+                  "GT-picked candidate, an oracle)",
+              render_table(["arm", "mode", "IoU fused", "delta", "prec fused",
+                            "recall fused", "IoU polygon", "delta", "best-of-3"],
+                           head)]
 
     by_t = []
     for name in arms:
@@ -306,18 +317,17 @@ def render_report(manifest: dict, arm_rows: dict[str, list[dict]]) -> str:
         if row["mode"] == mode:
             rows_by_incident.setdefault(row["incident"], []).append(row)
     for incident, group in rows_by_incident.items():
-        w = min(group, key=lambda r: (float(r[T_METRIC]), -float(r["gt_px_polygon"])))
-        worst.append(w)
-    worst.sort(key=lambda r: (float(r[T_METRIC]), -float(r["gt_px_polygon"])))
-    lines += ["", f"WORST SINGLE FRAME IN EACH  ({arm}, {mode}; lowest IoU, ties "
-                  "to the biggest GT plume)",
+        worst.append(min(group, key=_worst_key))
+    worst.sort(key=_worst_key)
+    lines += ["", f"WORST SINGLE FRAME IN EACH  ({arm}, {mode}, {T_METRIC}; lowest "
+                  "IoU, ties to the biggest GT plume)",
               render_table(["incident", "t", "frame", "IoU", "prec", "recall",
                             "GT px", "SAM 3 px"],
                            [[r["incident"], r["t"], r["frame_index"],
-                             f"{float(r['iou_polygon']):.3f}",
-                             f"{float(r['prec_polygon']):.3f}",
-                             f"{float(r['recall_polygon']):.3f}",
-                             px(r["gt_px_polygon"]), px(r["pred_px_polygon"])]
+                             f"{float(r[T_METRIC]):.3f}",
+                             f"{float(r[f'prec_{SURFACE}']):.3f}",
+                             f"{float(r[f'recall_{SURFACE}']):.3f}",
+                             px(r[f"gt_px_{SURFACE}"]), px(r[f"pred_px_{SURFACE}"])]
                             for r in worst])]
     return "\n".join(lines) + "\n"
 
@@ -504,8 +514,8 @@ def build(run_dir: Path, *, ckpt_request: str | None, arm_name: str | None,
                         "cache_dir": str(directory)})
         summary = summarize(rows, params.modes)
         for mode, s in summary.items():
-            log.info("  %-9s %-18s iou_polygon %.4f  iou_fused %.4f  by_t %s",
-                     arm, mode, s["iou_polygon"], s["iou_fused"],
+            log.info("  %-9s %-18s iou_fused %.4f  iou_polygon %.4f  by_t %s",
+                     arm, mode, s["iou_fused"], s["iou_polygon"],
                      [None if v is None else round(v, 3)
                       for v in s["iou_by_t"][T_METRIC]])
 

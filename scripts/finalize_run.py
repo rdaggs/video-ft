@@ -207,13 +207,44 @@ def val_table(run_dir: Path) -> str:
     if not path.is_file():
         return "(no log.csv)"
     rows = list(csv.DictReader(path.open(encoding="utf-8")))
-    lines = ["| epoch | split | loss | iou_fused | zero_grad_frames | secs |",
+    if rows and not legacy_log(run_dir):
+        lines = ["| epoch | split | loss | iou_fused | iou_selected | best-of-3 "
+                 "| zero_grad_frames | secs |", "|---|---|---|---|---|---|---|---|"]
+        for r in rows:
+            lines.append(f"| {r.get('epoch')} | {r.get('split')} | {r.get('loss')} | "
+                         f"{r.get('iou_fused')} | {r.get('iou_selected')} | "
+                         f"{r.get('iou_best')} | {r.get('zero_grad_frames')} | "
+                         f"{r.get('secs')} |")
+        return "\n".join(lines)
+    lines = ["The `iou_fused` column of this run's log.csv is really best-of-3 "
+             "(the GT-picked candidate, an oracle); the fused mask was not "
+             "logged. See gt_test_set/ for fused numbers.", "",
+             "| epoch | split | loss | best-of-3 | zero_grad_frames | secs |",
              "|---|---|---|---|---|---|"]
     for r in rows:
         lines.append(f"| {r.get('epoch')} | {r.get('split')} | {r.get('loss')} | "
                      f"{r.get('iou_fused')} | {r.get('zero_grad_frames')} | "
                      f"{r.get('secs')} |")
     return "\n".join(lines)
+
+
+def select_metric(run_dir: Path) -> str:
+    import yaml
+    try:
+        cfg = yaml.safe_load((run_dir / "config_resolved.yaml").read_text()) or {}
+    except (OSError, yaml.YAMLError):
+        return "iou_fused"
+    return (cfg.get("train") or {}).get("select_metric", "iou_fused")
+
+
+def legacy_log(run_dir: Path) -> bool:
+    """Runs before the clip_loss fix logged best-of-3 under the name iou_fused
+    and have no iou_best column."""
+    path = run_dir / "log.csv"
+    if not path.is_file():
+        return False
+    header = next(csv.reader(path.open(encoding="utf-8")), [])
+    return "iou_best" not in header
 
 
 def launch_message(sha: str) -> str:
@@ -253,8 +284,11 @@ def experiment_md(run: str, run_dir: Path, eval_status: tuple[str, str],
         f"- **config** `{prov.get('config_path')}` at that commit; overrides: "
         f"`{' '.join(overrides) or 'none'}`. The literal merged config is "
         "`config_resolved.yaml` here.",
-        # train.py compares val iou_fused whatever train.select_metric says.
-        f"- **best** val iou_fused {best.get('score')} at epoch {best.get('epoch')}",
+        (f"- **best** val best-of-3 (oracle; logged as iou_fused) "
+         f"{best.get('score')} at epoch {best.get('epoch')}"
+         if legacy_log(run_dir) else
+         f"- **best** val {select_metric(run_dir)} {best.get('score')} "
+         f"at epoch {best.get('epoch')}"),
         ("- **checkpoints** `best.pt` is committed here and loads on top of "
          "init_from; `last.pt` / `last_resume.pt` stay on /data3 — see "
          "`checkpoints.json`" if (EXPERIMENTS / run / GIT_CKPT).is_file() else

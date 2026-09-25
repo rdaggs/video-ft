@@ -57,6 +57,7 @@ def clip_loss(cfg, criterion: MaskLoss, outs, batch, keep_mask):
     total = torch.zeros((), device=outs[0].low_res_multimasks.device)
     weight_sum = 0.0
     per_t, per_kind = [], {"cond": [], "prompted": [], "dropout": []}
+    oracle = {"iou_best": 0.0, "iou_selected": 0.0}
     zero_grad_frames = 0
 
     for t, out in enumerate(outs):
@@ -68,7 +69,15 @@ def clip_loss(cfg, criterion: MaskLoss, outs, batch, keep_mask):
         weight = frame_weight(cfg, t, bool(keep_mask[t]))
         total = total + weight * result.total
         weight_sum += weight
-        iou = float(result.iou.mean())
+        # Not `result.iou`: that is the GT-picked best-of-3 candidate, an oracle
+        # no inference path can reach, and it read ~0.07 above the fused mask
+        # the poc actually ships. `iou_fused` is also what fused_surface scores
+        # at eval, so the two logs are the same number by construction.
+        with torch.no_grad():
+            ious = all_ious(logits.detach(), out.ious.detach().float(), target)
+        iou = float(ious["iou_fused"].mean())
+        for key in oracle:
+            oracle[key] += float(ious[key].mean()) / len(outs)
         per_t.append(iou)
         kind = "cond" if t == 0 else ("prompted" if keep_mask[t] else "dropout")
         per_kind[kind].append(iou)
@@ -79,6 +88,7 @@ def clip_loss(cfg, criterion: MaskLoss, outs, batch, keep_mask):
         "iou_by_t": per_t,
         "iou_by_kind": {k: (sum(v) / len(v) if v else float("nan"))
                         for k, v in per_kind.items()},
+        **oracle,
         "zero_grad_frames": zero_grad_frames,
     }
 
@@ -125,7 +135,8 @@ def run_epoch(tracker, loader, cfg, *, epoch: int, optimizer=None, scheduler=Non
     """One pass. `optimizer is None` means evaluation."""
     device = cfg.device
     criterion = criterion or MaskLoss(cfg.train.loss)
-    totals = {"loss": 0.0, "iou": 0.0, "n": 0, "zero_grad_frames": 0}
+    totals = {"loss": 0.0, "iou": 0.0, "iou_best": 0.0, "iou_selected": 0.0,
+              "n": 0, "zero_grad_frames": 0}
     by_t: list[float] = []
     by_kind = {"cond": 0.0, "prompted": 0.0, "dropout": 0.0}
     kind_n = {"cond": 0, "prompted": 0, "dropout": 0}
@@ -180,6 +191,8 @@ def run_epoch(tracker, loader, cfg, *, epoch: int, optimizer=None, scheduler=Non
 
         totals["loss"] += float(loss.detach())
         totals["iou"] += sum(stats["iou_by_t"]) / len(stats["iou_by_t"])
+        totals["iou_best"] += stats["iou_best"]
+        totals["iou_selected"] += stats["iou_selected"]
         totals["zero_grad_frames"] += stats["zero_grad_frames"]
         totals["n"] += 1
         if not by_t:
@@ -200,6 +213,9 @@ def run_epoch(tracker, loader, cfg, *, epoch: int, optimizer=None, scheduler=Non
     return {
         "loss": totals["loss"] / n,
         "iou": totals["iou"] / n,
+        "iou_fused": totals["iou"] / n,
+        "iou_best": totals["iou_best"] / n,
+        "iou_selected": totals["iou_selected"] / n,
         "iou_by_t": [v / n for v in by_t],
         "iou_by_kind": {k: (by_kind[k] / kind_n[k] if kind_n[k] else float("nan"))
                         for k in by_kind},

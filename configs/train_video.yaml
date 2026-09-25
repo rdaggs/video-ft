@@ -126,11 +126,13 @@ train:
   log_every: 50
   eval_every: 1
 
-  # iou_polygon is the surface the GUI ships. iou_fused and iou_polygon have
-  # disagreed on the SIGN of a change, so selecting on the proxy can ship the
-  # wrong epoch.
+  # The val pass computes iou_fused / iou_selected / iou_best only; iou_polygon
+  # needs full-frame geometry and is scored after the run by eval_video.py.
+  # iou_fused and iou_polygon have disagreed on the SIGN of a change, so check
+  # the GT report's polygon column before believing a selected epoch.
+  # (Runs before 2026-09-25 logged iou_best under the name iou_fused.)
   eval_polygon: true
-  select_metric: iou_polygon
+  select_metric: iou_fused
 
   # Which arm the in-training val pass runs. `conditional` is the shippable one
   # and the regime the dropout below trains for; the other two are scored by

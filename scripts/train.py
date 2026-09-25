@@ -285,9 +285,13 @@ def main() -> int:
     # plausible epoch-1 one.
     if not cfg.train.resume:
         log.info("epoch 0: zero-shot val pass")
-        stats = run_epoch(tracker, val_loader, cfg, epoch=0, train=False,
-                          criterion=criterion, log_every=cfg.train.log_every,
-                          probe_first=cfg.model.memory.log_bank_composition)
+        # eval() as in every later val pass: in train mode upstream reads GT for
+        # presence (:333), and val passes none.
+        tracker.eval()
+        with torch.no_grad():
+            stats = run_epoch(tracker, val_loader, cfg, epoch=0, train=False,
+                              criterion=criterion, log_every=cfg.train.log_every,
+                              probe_first=cfg.model.memory.log_bank_composition)
         record("val", 0, stats, cfg.train.lr)
         log.info("  val e0  loss %.4f iou_fused %.4f (best-of-3 %.4f)  boxed %.2f  "
                  "by_t %s  by_kind %s", stats["loss"], stats["iou"], stats["iou_best"],

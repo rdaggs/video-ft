@@ -28,6 +28,15 @@ uv sync
 `logs/<run>.log` always share a name. `logs/` and `ckpts/` are symlinks onto
 `/data3` because the root filesystem is full.
 
+With `--finalize`, a run that exits 0 scores the GT test set and commits and
+pushes `experiments/<run>/`, which holds the record needed to recreate it. See
+`.cursor/skills/video-test/SKILL.md`.
+
+```bash
+CUDA_VISIBLE_DEVICES=6 .venv/bin/python scripts/eval_video.py --run ckpts/<run>
+.venv/bin/python -m scripts.finalize_run --run <run>    # record a run by hand
+```
+
 ```bash
 python -m smokeftv.config_all --check   # the snapshot against every consumer
 python -m smokeftv.config_all --show    # what a run config inherits

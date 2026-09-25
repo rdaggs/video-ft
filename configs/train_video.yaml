@@ -17,8 +17,10 @@
 # `run_name` is absent on purpose. train.sh resolves it from its own stdout and
 # passes --run-name, so ckpts/<run>/ and logs/<run>.log cannot drift apart.
 #
-# Sweep with dotted overrides rather than by editing this file:
-#   ./train.sh --gpu 7 --tag A-lr3e-5 train.lr=3e-5 > logs/...
+# This is the only file in configs/. An experiment edits it in place and the
+# launch commit records it, so its git history is the list of previous
+# versions (see .cursor/skills/video-test). Snapshot keys are not edited here;
+# pass them as dotted overrides: ./train.sh ... data.clips.stride=4
 
 extends: ../training_config.yaml
 

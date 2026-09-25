@@ -26,8 +26,29 @@ python -m scripts.probe_schedule          # no GPU: dropout statistics
 `train.sh` resolves the run name from **its own stdout** — the timestamp is
 computed by the invoking shell, so it cannot recompute it without drifting by
 however long startup takes. `ckpts/<run>/` and `logs/<run>.log` therefore always
-share a name. Sweep with dotted overrides, never by editing a config:
-`./train.sh --gpu 7 --tag lr3e-5 train.lr=3e-5 > ...`
+share a name.
+
+## Experiments (`/video-test`)
+
+An experiment is run through the `/video-test` skill
+(`.cursor/skills/video-test/SKILL.md`) and ends as a pushed commit adding
+`experiments/<run>/`: config_resolved, the tagged log, clip manifest, label
+hashes (`data.json`), checkpoint paths + sha256 (`checkpoints.json`; the `.pt`
+files stay on `/data3`), the GT test-set eval, and `EXPERIMENT.md`.
+`train.sh --finalize` does this when training exits 0, via
+`scripts/finalize_run.py`, which runs `scripts/eval_video.py`.
+
+* **`configs/` holds only `train_video.yaml`, edited in place.** Its git
+  history is the record of previous versions; the launch commit is the code and
+  config a run used. Snapshot keys are still passed as dotted overrides, never
+  duplicated into the config.
+* **Experiment-specific code goes in `scripts/`.** A change to `smokeftv/` must
+  default to today's behaviour.
+* **`eval_video.py` withholds GT from the rollout.** The in-training val pass
+  does not: `mem_mask_source: supervised_best` picks the memory candidate from
+  the GT mask in eval mode too, so `log.csv` val and the GT test set are not the
+  same measurement. Also, `train.py` selects `best.pt` on val `iou_fused`,
+  whatever `select_metric` says.
 
 **`logs/` and `ckpts/` are symlinks into `/data3`.** The root filesystem is
 100% full (22 G on 14 T). `run.feature_cache_root` points there too.
@@ -154,4 +175,6 @@ indices silently produces an EMPTY memory bank with no error at all.
   `prompting.bbox_repair.enabled: true` — without that flag the same weights give
   0.6577468796, and 0.0044 is the same size as a real port bug. Until this
   passes, a video number cannot be compared to the image arm.
-* The feature cache (`features.py`), eval arms 2 and 3, and Phase B/C.
+* The feature cache (`features.py`) and Phase B/C. `eval_video.py` scores the
+  three inference modes on GT clips, but its numbers are not comparable to the
+  image arm until the gate above passes.

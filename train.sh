@@ -12,6 +12,10 @@
 #
 # Extra args are passed through as config overrides:
 #   ./train.sh --gpu 7 --tag lr3e-5 train.lr=3e-5 clips.stride=4 > ...
+#
+# --finalize: when training exits 0, score the GT test set on the same GPU and
+# commit + push experiments/<run>/ (scripts/finalize_run.py). /video-test
+# always passes it.
 
 set -euo pipefail
 
@@ -22,6 +26,7 @@ GPU=""
 TAG=""
 CONFIG="configs/train_video.yaml"
 ALLOW_DIRTY=0
+FINALIZE=0
 OVERRIDES=()
 
 while [[ $# -gt 0 ]]; do
@@ -30,8 +35,9 @@ while [[ $# -gt 0 ]]; do
     --tag)         TAG="$2"; shift 2 ;;
     --config)      CONFIG="$2"; shift 2 ;;
     --allow-dirty) ALLOW_DIRTY=1; shift ;;
+    --finalize)    FINALIZE=1; shift ;;
     -h|--help)
-      sed -n '2,20p' "${BASH_SOURCE[0]}" | sed 's/^# \?//'
+      sed -n '2,24p' "${BASH_SOURCE[0]}" | sed 's/^# \?//'
       exit 0 ;;
     *)             OVERRIDES+=("$1"); shift ;;
   esac
@@ -99,6 +105,7 @@ overrides  ${OVERRIDES[*]:-<none>}
 ckpt_dir   ${CKPT_DIR}
 log        ${LOG_PATH}
 git        ${GIT_SHA}$([[ $GIT_DIRTY -eq 1 ]] && echo ' (DIRTY)')
+finalize   $([[ $FINALIZE -eq 1 ]] && echo yes || echo no)
 started    $(date -u +%Y-%m-%dT%H:%M:%SZ)
 host       $(hostname)
 ================================================================================
@@ -111,12 +118,37 @@ export SAM3_VIDEO_RUN_NAME="$RUN_NAME"
 # scripts/train.py writes config_resolved.yaml (extends stripped),
 # provenance.json, splits_resolved.yaml, clip_manifest.jsonl,
 # prompt_schedule.jsonl, metrics.jsonl and repro.sh into CKPT_DIR.
-exec .venv/bin/python -m scripts.train \
+#
+# Not `exec`: the shell has to outlive training to run --finalize. So the
+# trainer is a child, and TERM/INT/HUP on this PID are forwarded to it — `kill
+# <pid>` has to keep stopping the run, not orphan it. INT is forwarded as TERM
+# because a non-interactive shell starts background children with SIGINT
+# ignored.
+.venv/bin/python -m scripts.train \
   --config "$CONFIG" \
   --run-name "$RUN_NAME" \
   --ckpt-dir "$CKPT_DIR" \
   --tag "$TAG" \
   --git-sha "$GIT_SHA" \
   --git-dirty "$GIT_DIRTY" \
-  "${OVERRIDES[@]}"
+  "${OVERRIDES[@]}" &
+CHILD=$!
+trap 'kill -TERM "$CHILD" 2>/dev/null' TERM INT HUP
+set +e
+wait "$CHILD"; STATUS=$?
+# A trapped signal interrupts `wait` before the child has exited.
+while kill -0 "$CHILD" 2>/dev/null; do wait "$CHILD"; STATUS=$?; done
+set -e
+trap - TERM INT HUP
+
+if [[ "$STATUS" -ne 0 ]]; then
+  echo "train.sh: training exited ${STATUS}$([[ $FINALIZE -eq 1 ]] && echo '; not finalizing')." >&2
+  [[ $FINALIZE -eq 1 ]] && echo "          record it anyway: .venv/bin/python -m scripts.finalize_run --run ${RUN_NAME}" >&2
+  exit "$STATUS"
+fi
+
+if [[ "$FINALIZE" -eq 1 ]]; then
+  echo "train.sh: finalizing ${RUN_NAME} (GT test set, experiments/${RUN_NAME}/, commit, push)"
+  exec .venv/bin/python -m scripts.finalize_run --run "$RUN_NAME"
+fi
 

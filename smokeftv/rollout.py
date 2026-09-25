@@ -65,43 +65,61 @@ class BankProbe:
         return None
 
 
-def rollout_clip(tracker, batch, cfg, *, keep_mask, probe: BankProbe | None = None
-                 ) -> tuple[list[TrackOut], list[dict]]:
+def _step(tracker, batch, cfg, t: int, length: int, output_dict: dict,
+          with_box: bool, gt_mask) -> TrackOut:
+    feats, pos, sizes = batch["feats"][t]
+    return track_step_train(
+        tracker,
+        frame_idx=t,
+        is_init_cond_frame=(t == 0),
+        current_vision_feats=feats,
+        current_vision_pos_embeds=pos,
+        feat_sizes=sizes,
+        point_inputs=(box_to_point_inputs(batch["boxes"][t], cfg.crop.image_size)
+                      if with_box else None),
+        output_dict=output_dict,
+        num_frames=length,
+        multimask_output=(cfg.model.multimask_mode == "always" or not with_box),
+        gt_mask=gt_mask,
+        mem_mask_source=cfg.model.mem_mask_source,
+    )
+
+
+def rollout_clip(tracker, batch, cfg, *, keep_mask, probe: BankProbe | None = None,
+                 reprompt=None) -> tuple[list[TrackOut], list[dict]]:
     """Run one clip end to end, returning a `TrackOut` per frame.
 
     `batch["feats"]` is a list of length L, each a 3-level
     `(current_vision_feats, current_vision_pos_embeds, feat_sizes)` triple.
     Frame indices handed to `track_step_train` are LOCAL (0..L-1); see its
     docstring for why that is load-bearing rather than tidy.
+
+    `batch["targets_high"]` may be None. The GT eval passes None, because
+    `mem_mask_source: supervised_best` picks the memory candidate from the GT
+    mask whenever one is given — in eval mode too — which is a leak at test time.
+
+    `reprompt(t, out) -> bool` is the eval's `conditional` arm: an unprompted
+    frame is tracked from memory first, and re-run WITH its box when the
+    callback rejects the propagated mask. Only the accepted output is filed, so
+    memory never sees the rejected attempt.
     """
     length = len(batch["feats"])
     output_dict: dict = {"cond_frame_outputs": {}, "non_cond_frame_outputs": {}}
     outs: list[TrackOut] = []
     labels: list[dict] = []
     truncate = cfg.model.memory.truncate_bptt
+    targets_high = batch.get("targets_high")
 
     for t in range(length):
-        feats, pos, sizes = batch["feats"][t]
         is_init = (t == 0)
         prompted = bool(keep_mask[t])
-        point_inputs = (box_to_point_inputs(batch["boxes"][t], cfg.crop.image_size)
-                        if prompted else None)
+        gt_mask = targets_high[t] if targets_high is not None else None
 
-        out = track_step_train(
-            tracker,
-            frame_idx=t,
-            is_init_cond_frame=is_init,
-            current_vision_feats=feats,
-            current_vision_pos_embeds=pos,
-            feat_sizes=sizes,
-            point_inputs=point_inputs,
-            output_dict=output_dict,
-            num_frames=length,
-            multimask_output=(cfg.model.multimask_mode == "always"
-                              or not prompted),
-            gt_mask=batch["targets_high"][t],
-            mem_mask_source=cfg.model.mem_mask_source,
-        )
+        out = _step(tracker, batch, cfg, t, length, output_dict, prompted, gt_mask)
+        reprompted = False
+        if not prompted and reprompt is not None and reprompt(t, out):
+            out = _step(tracker, batch, cfg, t, length, output_dict, True, gt_mask)
+            prompted = reprompted = True
         outs.append(out)
 
         # ---- THE override. is_cond is (t == 0 or a re-init) ONLY ---------- #
@@ -123,6 +141,7 @@ def rollout_clip(tracker, batch, cfg, *, keep_mask, probe: BankProbe | None = No
         output_dict[key][t] = entry
 
         labels.append({"t": t, "is_cond": is_init, "prompted": prompted,
+                       "reprompted": reprompted,
                        "n_cond": len(output_dict["cond_frame_outputs"]),
                        "n_recent": min(len(output_dict["non_cond_frame_outputs"]),
                                        tracker.num_maskmem - 1)})

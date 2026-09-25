@@ -47,6 +47,15 @@ resolve_run_name() {
   if target="$(readlink -f /proc/self/fd/1 2>/dev/null)" && [[ "$target" == *.log ]]; then
     basename "$target" .log
   else
+    # Fall back to our own timestamp. Say so: if stdout IS a file and merely
+    # lacks the .log suffix (a typo'd redirect), the fallback name will not
+    # match it, ckpts/<run>/run.log becomes a dangling symlink, and the two
+    # only appear to agree when startup happens to land in the same second.
+    if [[ -n "${target:-}" && "$target" != /dev/* && "$target" != *.log ]]; then
+      echo "train.sh: stdout is ${target}, which does not end in .log —" >&2
+      echo "          falling back to a generated run name, so ckpts/<run>/run.log" >&2
+      echo "          will not point at it. Redirect to logs/<something>.log." >&2
+    fi
     echo "$(date -u +%Y%m%d_%H%M%SZ)_${TAG}"
   fi
 }

@@ -20,7 +20,7 @@ Every experiment ends as one git commit, pushed, that adds `experiments/<run>/`:
 | config | `configs/train_video.yaml` at the launch commit, plus the literal merged `config_resolved.yaml` |
 | log, tagged | `experiments/<run>/<timestamp>_<tag>.log` |
 | training data manifest | `clip_manifest.jsonl`, `splits_resolved.yaml`, `data.json` (per-incident label hashes) |
-| checkpoints | stay on `/data3`; `checkpoints.json` records path + sha256 |
+| checkpoints | `best.pt` is committed at `experiments/<run>/best.pt`; `last.pt` and `last_resume.pt` stay on `/data3`. `checkpoints.json` records path + sha256 for all of them |
 | GT test-set eval | `gt_test_set/` (report.txt, per-arm frames.csv / incidents.csv / summary.json) |
 | summary | `EXPERIMENT.md`: intent, results, reproduce recipe |
 

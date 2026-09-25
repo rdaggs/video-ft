@@ -33,8 +33,10 @@ share a name.
 An experiment is run through the `/video-test` skill
 (`.cursor/skills/video-test/SKILL.md`) and ends as a pushed commit adding
 `experiments/<run>/`: config_resolved, the tagged log, clip manifest, label
-hashes (`data.json`), checkpoint paths + sha256 (`checkpoints.json`; the `.pt`
-files stay on `/data3`), the GT test-set eval, and `EXPERIMENT.md`.
+hashes (`data.json`), `best.pt` (~30 MB; `last.pt` and `last_resume.pt` stay
+on `/data3`, hashed in `checkpoints.json`), the GT test-set eval, and
+`EXPERIMENT.md`. `best.pt` is copied there rather than tracked under `ckpts/`
+because git will not add a path behind the `ckpts -> /data3` symlink.
 `train.sh --finalize` does this when training exits 0, via
 `scripts/finalize_run.py`, which runs `scripts/eval_video.py`.
 

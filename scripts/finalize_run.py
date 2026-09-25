@@ -10,13 +10,14 @@ It does four things, in this order:
 
 1. **Scores the GT test set** with `scripts/eval_video.py` unless
    `ckpts/<run>/gt_test_set/` already holds a full (non `--limit`) result.
-2. **Copies the run into `experiments/<run>/`**: every file in `ckpts/<run>/`
-   except checkpoints and anything over `MAX_COPY_BYTES`, plus the launcher's
-   log `logs/<run>.log` under its own tagged name.
-3. **Writes the two manifests** that make the record exact without putting
-   binaries in git:
+2. **Copies the run into `experiments/<run>/`**: `best.pt`, and every other
+   file in `ckpts/<run>/` except checkpoints and anything over
+   `MAX_COPY_BYTES`, plus the launcher's log `logs/<run>.log` under its own
+   tagged name. `last.pt` and `last_resume.pt` stay on /data3.
+3. **Writes the two manifests** that make the record exact:
      checkpoints.json  every *.pt in the run dir: real path on /data3, bytes,
-                       sha256, and the overlays it composes with
+                       sha256, whether it is in git, and the overlays it
+                       composes with
      data.json         per-incident sha256 of annotations.json and
                        polygons.coco.json for every train/val incident and the
                        GT set, so a relabel since the run is detectable
@@ -51,6 +52,12 @@ EXPERIMENTS = REPO_ROOT / "experiments"
 # run writes; anything bigger is a binary that belongs on /data3.
 MAX_COPY_BYTES = 20 * 1024 * 1024
 SKIP_SUFFIXES = {".pt", ".pth", ".ckpt", ".tmp"}
+# The one checkpoint the record carries. It lives here rather than under ckpts/
+# because ckpts is a symlink onto /data3 and git will not add a path behind a
+# symlink. GitHub rejects files over 100 MB, so a bigger best.pt (an unfrozen
+# encoder) stays on /data3 and is only hashed.
+GIT_CKPT = "best.pt"
+MAX_GIT_CKPT_BYTES = 95 * 1024 * 1024
 
 
 def sh(*args: str, check: bool = True) -> subprocess.CompletedProcess:
@@ -109,6 +116,14 @@ def copy_run(run_dir: Path, exp_dir: Path) -> list[dict]:
             continue
         real = src.resolve()
         size = real.stat().st_size
+        if str(rel) == GIT_CKPT:
+            if size <= MAX_GIT_CKPT_BYTES:
+                shutil.copy2(real, exp_dir / rel)
+            else:
+                print(f"finalize: WARNING {GIT_CKPT} is {size / 2**20:.0f} MB, over "
+                      "GitHub's limit; it stays on /data3 (see checkpoints.json)",
+                      file=sys.stderr)
+            continue
         if src.suffix in SKIP_SUFFIXES or size > MAX_COPY_BYTES:
             if src.suffix not in (".pt", ".tmp"):
                 skipped.append({"file": str(rel), "path": str(real), "bytes": size,
@@ -124,11 +139,15 @@ def copy_run(run_dir: Path, exp_dir: Path) -> list[dict]:
     return skipped
 
 
-def checkpoint_manifest(run_dir: Path, provenance: dict) -> dict:
+def checkpoint_manifest(run_dir: Path, exp_dir: Path, provenance: dict) -> dict:
     ckpts = []
     for path in sorted(run_dir.glob("*.pt")):
+        digest = sha256(path)
+        copy = exp_dir / path.name
         entry = {"file": path.name, "path": str(path.resolve()),
-                 "bytes": path.stat().st_size, "sha256": sha256(path)}
+                 "bytes": path.stat().st_size, "sha256": digest,
+                 "in_git": (str(copy.relative_to(REPO_ROOT))
+                            if copy.is_file() and sha256(copy) == digest else None)}
         try:
             import torch
             blob = torch.load(path, map_location="cpu", weights_only=False)
@@ -142,9 +161,10 @@ def checkpoint_manifest(run_dir: Path, provenance: dict) -> dict:
             entry["meta_error"] = str(exc)[:200]
         ckpts.append(entry)
     return {
-        "note": "Checkpoints stay on /data3; this is what the record points at. "
-                "A checkpoint is a sparse overlay of requires_grad tensors and "
-                "loads ON TOP of init_from (see smokeftv.checkpoint).",
+        "note": "best.pt is committed beside this file (`in_git`); the rest stay "
+                "on /data3 at `path`. A checkpoint is a sparse overlay of "
+                "requires_grad tensors and loads ON TOP of init_from (see "
+                "smokeftv.checkpoint).",
         "init_from": provenance.get("init_from"),
         "checkpoints": ckpts,
     }
@@ -235,8 +255,11 @@ def experiment_md(run: str, run_dir: Path, eval_status: tuple[str, str],
         "`config_resolved.yaml` here.",
         # train.py compares val iou_fused whatever train.select_metric says.
         f"- **best** val iou_fused {best.get('score')} at epoch {best.get('epoch')}",
-        "- **checkpoints** stay on /data3 — see `checkpoints.json` for paths and "
-        "sha256",
+        ("- **checkpoints** `best.pt` is committed here and loads on top of "
+         "init_from; `last.pt` / `last_resume.pt` stay on /data3 — see "
+         "`checkpoints.json`" if (EXPERIMENTS / run / GIT_CKPT).is_file() else
+         "- **checkpoints** all stay on /data3 — see `checkpoints.json` for "
+         "paths and sha256"),
         f"- **GT test set** {eval_status[0]} ({eval_status[1]})",
         f"- **host** {(prov.get('env') or {}).get('host')} "
         f"GPU {(prov.get('env') or {}).get('gpu_name')}",
@@ -343,7 +366,7 @@ def main() -> int:
         shutil.copy2(log_path.resolve(), exp_dir / log_name)
 
     (exp_dir / "checkpoints.json").write_text(
-        json.dumps(checkpoint_manifest(run_dir, provenance), indent=2) + "\n",
+        json.dumps(checkpoint_manifest(run_dir, exp_dir, provenance), indent=2) + "\n",
         encoding="utf-8")
     (exp_dir / "data.json").write_text(
         json.dumps(data_manifest(run_dir), indent=2) + "\n", encoding="utf-8")

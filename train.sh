@@ -102,7 +102,7 @@ export SAM3_VIDEO_RUN_NAME="$RUN_NAME"
 # scripts/train.py writes config_resolved.yaml (extends stripped),
 # provenance.json, splits_resolved.yaml, clip_manifest.jsonl,
 # prompt_schedule.jsonl, metrics.jsonl and repro.sh into CKPT_DIR.
-exec python -m scripts.train \
+exec .venv/bin/python -m scripts.train \
   --config "$CONFIG" \
   --run-name "$RUN_NAME" \
   --ckpt-dir "$CKPT_DIR" \

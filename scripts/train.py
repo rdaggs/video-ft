@@ -182,8 +182,10 @@ def main() -> int:
     init_from = [cfg.train.init_ckpt] if isinstance(cfg.train.init_ckpt, str) \
         else list(cfg.train.init_ckpt or [])
     init_from = init_from or [config_all.load()["meta"]["init_from"]]
-    if cfg.train.resume:
-        init_from = []
+    # Applied on resume too. A checkpoint holds only requires_grad tensors, so
+    # last.pt carries the memory path and NOT L4E-2's trunk; skipping init_from
+    # here would resume onto released SAM 3 weights with no error. last.pt is
+    # loaded on top below, so it still wins wherever the two overlap.
     for path, meta in (ckpt.load_overlays(init_from, tracker) if init_from else []):
         log.info("init_from %s  %s", Path(path).name,
                  {k: meta[k] for k in ("run_name", "epoch") if k in meta})

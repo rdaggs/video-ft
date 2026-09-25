@@ -11,7 +11,7 @@ from smokeftv.boxes import resolve_box
 from smokeftv.incidents import frame_path, load_polygons
 from smokeftv.masks import polygons_to_mask
 from smokeftv.preprocess import load_frame
-from smokeftv.prompting import boxes_for_source
+from smokeftv.prompting import boxes_for_source, jitter_boxes
 
 # Sam3Processor's own chain: uint8 -> square resize -> float -> normalize(0.5,0.5).
 # The resize does NOT preserve aspect, which is why crops.compute_window squares
@@ -41,17 +41,18 @@ class ClipDataset(Dataset):
     def __len__(self) -> int:
         return len(self.clips)
 
-    def _incident_data(self, incident: str):
+    def _incident_data(self, incident: str, image_hw):
         if incident not in self._polygons:
             polygons, _ = load_polygons(self.cfg.data.root, incident)
             self._polygons[incident] = polygons
-            self._boxes[incident] = boxes_for_source(
-                self.cfg.prompt, self.cfg.data.root, incident)
+            self._boxes[incident] = jitter_boxes(
+                boxes_for_source(self.cfg.prompt, self.cfg.data.root, incident),
+                self.cfg.prompt.box_jitter, incident, image_hw)
         return self._polygons[incident], self._boxes[incident]
 
     def __getitem__(self, index: int) -> dict:
         clip = self.clips[index]
-        polygons, boxes_by_frame = self._incident_data(clip.incident)
+        polygons, boxes_by_frame = self._incident_data(clip.incident, clip.image_hw)
         box_frames = sorted(boxes_by_frame)
         size = self.cfg.crop.image_size
         loss_size = self.cfg.train.loss_size

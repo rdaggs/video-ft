@@ -20,7 +20,7 @@ from smokeftv.clips import (
 )
 from smokeftv.incidents import camera_of, frame_path, load_polygons
 from smokeftv.masklets import incident_masklets
-from smokeftv.prompting import boxes_for_source
+from smokeftv.prompting import boxes_for_source, jitter_boxes
 
 DEFAULT_IMAGE_HW = (1872, 3328)
 
@@ -90,6 +90,10 @@ def build_incident_clips(cfg, incident: str, split: str
     report.capped_frames = len(kept)
 
     box_frames = sorted(boxes_by_frame)
+    # Linked above from the clean boxes so jitter cannot change which samples
+    # exist; the window is built from the boxes the prompts will actually carry.
+    prompt_boxes = jitter_boxes(boxes_by_frame, cfg.prompt.box_jitter, incident,
+                                image_hw)
     out: list[Clip] = []
     for masklet in masklets:
         observed = masklet.observed_frames()
@@ -114,9 +118,9 @@ def build_incident_clips(cfg, incident: str, split: str
         stride = realised_stride(len(usable), params)
         report.stride = max(report.stride, stride)
         rng = clip_rng(params.seed, incident, masklet.masklet_id)
-        window = _window_for(cfg, boxes_by_frame, usable, image_hw)
+        window = _window_for(cfg, prompt_boxes, usable, image_hw)
         ratio = _window_ratio(window, [b for f in usable
-                                       for b in boxes_by_frame.get(f, ())])
+                                       for b in prompt_boxes.get(f, ())])
         side = max(window[2] - window[0], window[3] - window[1])
 
         for positions in clip_starts(len(usable), params, stride, rng):

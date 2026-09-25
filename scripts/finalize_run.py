@@ -9,7 +9,9 @@ hand, it is also how an interrupted or eval-only experiment gets recorded.
 It does four things, in this order:
 
 1. **Scores the GT test set** with `scripts/eval_video.py` unless
-   `ckpts/<run>/gt_test_set/` already holds a full (non `--limit`) result.
+   `ckpts/<run>/gt_test_set/` already holds a full (non `--limit`) result for
+   this `best.pt` — twice: clean boxes, and boxes padded by `BOX_JITTER_EVAL`
+   (`gt_test_set_boxjitter/`).
 2. **Copies the run into `experiments/<run>/`**: `best.pt`, and every other
    file in `ckpts/<run>/` except checkpoints and anything over
    `MAX_COPY_BYTES`, plus the launcher's log `logs/<run>.log` under its own
@@ -58,6 +60,9 @@ SKIP_SUFFIXES = {".pt", ".pth", ".ckpt", ".tmp"}
 # encoder) stays on /data3 and is only hashed.
 GIT_CKPT = "best.pt"
 MAX_GIT_CKPT_BYTES = 95 * 1024 * 1024
+# Every run is also scored with jittered prompt boxes, one fixed band for all,
+# so box robustness is comparable across runs whether or not they trained on it.
+BOX_JITTER_EVAL = (0.5, 2.0)
 
 
 def sh(*args: str, check: bool = True) -> subprocess.CompletedProcess:
@@ -80,9 +85,11 @@ def read_json(path: Path) -> dict:
         return {}
 
 
-def run_eval(run_dir: Path, refresh: bool) -> tuple[str, str]:
+def run_eval(run_dir: Path, refresh: bool, box_jitter: tuple[float, float] | None = None
+             ) -> tuple[str, str]:
     """`(status, note)`. Never raises: a failed eval is recorded, not fatal."""
-    manifest = read_json(run_dir / "gt_test_set" / "manifest.json")
+    out_name = "gt_test_set" if box_jitter is None else "gt_test_set_boxjitter"
+    manifest = read_json(run_dir / out_name / "manifest.json")
     scored = (manifest.get("arms") or [{}])[-1]
     ckpt, recorded = scored.get("ckpt"), (scored.get("overlay_sha256") or [None])[-1]
     # By hash, not by existence: an eval taken mid-run scored an earlier
@@ -98,6 +105,8 @@ def run_eval(run_dir: Path, refresh: bool) -> tuple[str, str]:
                "--run", str(run_dir)]
     if refresh:
         command.append("--refresh")
+    if box_jitter is not None:
+        command += ["--box-jitter", f"{box_jitter[0]},{box_jitter[1]}"]
     print(f"finalize: scoring the GT test set: {' '.join(command)}", flush=True)
     result = subprocess.run(command, cwd=REPO_ROOT, check=False)
     if result.returncode != 0:
@@ -262,7 +271,8 @@ def remote_url() -> str:
 
 
 def experiment_md(run: str, run_dir: Path, eval_status: tuple[str, str],
-                  skipped: list[dict], log_name: str | None) -> str:
+                  skipped: list[dict], log_name: str | None,
+                  jitter_status: tuple[str, str] = ("skipped", "not run")) -> str:
     prov = read_json(run_dir / "provenance.json")
     git = prov.get("git") or {}
     sha = git.get("sha", "unknown")
@@ -294,7 +304,9 @@ def experiment_md(run: str, run_dir: Path, eval_status: tuple[str, str],
          "`checkpoints.json`" if (EXPERIMENTS / run / GIT_CKPT).is_file() else
          "- **checkpoints** all stay on /data3 — see `checkpoints.json` for "
          "paths and sha256"),
-        f"- **GT test set** {eval_status[0]} ({eval_status[1]})",
+        f"- **GT test set** {eval_status[0]} ({eval_status[1]}); with prompt "
+        f"boxes padded U{BOX_JITTER_EVAL} per axis: {jitter_status[0]} "
+        f"({jitter_status[1]})",
         f"- **host** {(prov.get('env') or {}).get('host')} "
         f"GPU {(prov.get('env') or {}).get('gpu_name')}",
     ]
@@ -318,6 +330,11 @@ def experiment_md(run: str, run_dir: Path, eval_status: tuple[str, str],
     if report.is_file():
         lines += ["", "## GT test set (gt_test_set/report.txt)", "", "```",
                   report.read_text(encoding="utf-8").rstrip(), "```"]
+    jitter_report = run_dir / "gt_test_set_boxjitter" / "report.txt"
+    if jitter_report.is_file():
+        lines += ["", "## GT test set, jittered boxes "
+                      "(gt_test_set_boxjitter/report.txt)", "", "```",
+                  jitter_report.read_text(encoding="utf-8").rstrip(), "```"]
     if skipped:
         lines += ["", "## Left on /data3 (too large for git)", ""]
         lines += [f"- `{s['file']}` {s['bytes']:,} B sha256 `{s['sha256'][:16]}` "
@@ -386,6 +403,10 @@ def main() -> int:
     eval_status = ("skipped", "--no-eval") if args.no_eval else \
         run_eval(run_dir, args.refresh_eval)
     print(f"finalize: GT test set {eval_status[0]} ({eval_status[1]})", flush=True)
+    jitter_status = ("skipped", "--no-eval") if args.no_eval else \
+        run_eval(run_dir, args.refresh_eval, BOX_JITTER_EVAL)
+    print(f"finalize: GT test set, jittered boxes {jitter_status[0]} "
+          f"({jitter_status[1]})", flush=True)
 
     exp_dir = EXPERIMENTS / run
     if exp_dir.exists():
@@ -405,12 +426,13 @@ def main() -> int:
     (exp_dir / "data.json").write_text(
         json.dumps(data_manifest(run_dir), indent=2) + "\n", encoding="utf-8")
     (exp_dir / "EXPERIMENT.md").write_text(
-        experiment_md(run, run_dir, eval_status, skipped, log_name), encoding="utf-8")
+        experiment_md(run, run_dir, eval_status, skipped, log_name, jitter_status),
+        encoding="utf-8")
     print(f"finalize: wrote {exp_dir.relative_to(REPO_ROOT)}")
 
     if not args.no_commit:
         commit_and_push(exp_dir, run, tag, push=not args.no_push)
-    return 0 if eval_status[0] != "failed" else 1
+    return 0 if "failed" not in (eval_status[0], jitter_status[0]) else 1
 
 
 if __name__ == "__main__":

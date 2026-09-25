@@ -46,11 +46,15 @@ because git will not add a path behind the `ckpts -> /data3` symlink.
   duplicated into the config.
 * **Experiment-specific code goes in `scripts/`.** A change to `smokeftv/` must
   default to today's behaviour.
-* **`eval_video.py` withholds GT from the rollout.** The in-training val pass
-  does not: `mem_mask_source: supervised_best` picks the memory candidate from
-  the GT mask in eval mode too, so `log.csv` val and the GT test set are not the
-  same measurement. Also, `train.py` selects `best.pt` on val `iou_fused`,
-  whatever `select_metric` says.
+* **Val is inference.** The in-training val pass runs `train.inference_mode`
+  with `eval_video`'s own policy code and no GT in the rollout, logs real
+  `iou_fused` (plus `iou_selected` and the oracle `iou_best`), and selects
+  `best.pt` on `select_metric`. Runs before 2026-09-25 did none of that: their
+  `log.csv` `iou_fused` is really best-of-3, measured every-frame-prompted with
+  GT in the memory selection, ~0.07 above the fused mask.
+* **Every run is scored twice on the GT set**: clean boxes (`gt_test_set/`) and
+  boxes padded per axis by U(0.5, 2.0) (`gt_test_set_boxjitter/`), the same
+  boxes for every run. `prompt.box_jitter` is the matching train-time knob.
 
 **`logs/` and `ckpts/` are symlinks into `/data3`.** The root filesystem is
 100% full (22 G on 14 T). `run.feature_cache_root` points there too.

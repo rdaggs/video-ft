@@ -134,9 +134,11 @@ train:
   eval_polygon: true
   select_metric: iou_fused
 
-  # Which arm the in-training val pass runs. `conditional` is the shippable one
-  # and the regime the dropout below trains for; the other two are scored by
-  # scripts/eval_video.py after the run, not during it.
+  # Which arm the in-training val pass runs, with eval_video's own policy code
+  # and no GT inside the rollout, so best.pt is picked on frames where memory
+  # carries the object. `conditional` is the shippable one and the regime the
+  # dropout below trains for; all three are scored on the GT set after the run.
+  # (Runs before 2026-09-25 ignored this and prompted every val frame, with GT.)
   inference_mode: conditional
 
   init_ckpt: null      # meta.init_from is applied by scripts/train.py

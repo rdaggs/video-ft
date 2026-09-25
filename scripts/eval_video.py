@@ -228,6 +228,10 @@ def render_report(manifest: dict, arm_rows: dict[str, list[dict]]) -> str:
         f"  held out: {len(manifest['trained_incidents'])} trained incidents, "
         f"{len(manifest['trained_cameras'])} shared cameras",
     ]
+    if manifest.get("box_jitter"):
+        low, high = manifest["box_jitter"]
+        lines.append(f"  BOX JITTER: every prompt box padded per axis by p ~ "
+                     f"U({low}, {high}), seeded per frame — the same boxes for every run")
     if manifest.get("sample_limit"):
         lines.append(f"  --limit {manifest['sample_limit']} clips: a smoke test, "
                      "NOT a result")
@@ -338,12 +342,16 @@ def render_report(manifest: dict, arm_rows: dict[str, list[dict]]) -> str:
 
 def cache_key(cfg, params, poc, geometry_sha: str, overlays_config: dict) -> str:
     """Everything the rows depend on except the weights and the incident list."""
+    prompt = asdict(cfg.prompt)
+    # Absent unless on, so keys scored before the field existed stay valid.
+    if not cfg.prompt.box_jitter.enabled:
+        prompt.pop("box_jitter")
     payload = {
         "root": cfg.data.root,
         "clips": asdict(cfg.data.clips),
         "masklets": asdict(cfg.data.masklets),
         "crop": asdict(cfg.crop),
-        "prompt": asdict(cfg.prompt),
+        "prompt": prompt,
         "clahe": [cfg.data.clahe, cfg.data.clahe_clip, cfg.data.clahe_grid],
         "gt": [cfg.data.gt_merge, cfg.data.min_mask_pixels],
         "model": [cfg.model.sam_version, cfg.model.multimask_mode,
@@ -409,14 +417,20 @@ def covers(rows: list[dict], expected: set[str], modes) -> str | None:
     return None
 
 
+def out_dir_name(box_jitter: tuple[float, float] | None) -> str:
+    return "gt_test_set" if box_jitter is None else "gt_test_set_boxjitter"
+
+
 def build(run_dir: Path, *, ckpt_request: str | None, arm_name: str | None,
-          modes: tuple[str, ...] | None, limit: int | None, refresh: bool) -> int:
+          modes: tuple[str, ...] | None, limit: int | None, refresh: bool,
+          box_jitter: tuple[float, float] | None = None) -> int:
     run_dir = resolve(run_dir)
     config = run_dir / "config_resolved.yaml"
     if not config.is_file():
         raise SystemExit(f"{config} is missing. Without it the geometry this "
                          "checkpoint was trained under is unknown.")
-    log = setup_logging(run_dir / "gt_test_set")
+    out_dir = run_dir / out_dir_name(box_jitter)
+    log = setup_logging(out_dir)
 
     import torch
 
@@ -428,7 +442,7 @@ def build(run_dir: Path, *, ckpt_request: str | None, arm_name: str | None,
 
     probe = load_config(config)
     gt_root = probe.data.gt_dataset_root
-    cfg = load_config(config, [*eval_overrides(gt_root),
+    cfg = load_config(config, [*eval_overrides(gt_root, box_jitter),
                                f"run_name=gt_test_set_{run_dir.name}"])
     ev = config_all.load()["eval_video"]
     params = EvalParams(modes=tuple(modes or ev.get("inference_modes") or MODES),
@@ -519,12 +533,12 @@ def build(run_dir: Path, *, ckpt_request: str | None, arm_name: str | None,
                      [None if v is None else round(v, 3)
                       for v in s["iou_by_t"][T_METRIC]])
 
-    out_dir = run_dir / "gt_test_set"
     manifest = {
         "schema": SCHEMA,
         "run": run_dir.name,
         "cache_key": key,
         "data_root": gt_root,
+        "box_jitter": list(box_jitter) if box_jitter else None,
         "config_source": str(config),
         "config_sha256": runlog.sha256_file(config),
         "modes": list(params.modes),
@@ -606,10 +620,18 @@ def main() -> int:
                              "result, and never cached")
     parser.add_argument("--refresh", action="store_true",
                         help="rescore both arms even if they are cached")
+    parser.add_argument("--box-jitter", default=None, metavar="PMIN,PMAX",
+                        help="pad every prompt box by p ~ U(PMIN, PMAX) per axis "
+                             "(seeded per frame, identical for every run) and "
+                             "write gt_test_set_boxjitter/ instead")
     args = parser.parse_args()
+    jitter = None
+    if args.box_jitter:
+        low, high = (float(v) for v in args.box_jitter.split(","))
+        jitter = (low, high)
     return build(Path(args.run), ckpt_request=args.ckpt, arm_name=args.arm_name,
                  modes=tuple(args.mode) if args.mode else None, limit=args.limit,
-                 refresh=args.refresh)
+                 refresh=args.refresh, box_jitter=jitter)
 
 
 if __name__ == "__main__":

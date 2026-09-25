@@ -91,6 +91,24 @@ class CropConfig:
 
 
 @dataclass
+class BoxJitterParams:
+    """Per-frame box padding, p ~ U(pad_min, pad_max): each side grows by p/2 of
+    the box's OWN extent on that axis, so the box becomes (1+p)w x (1+p)h about
+    the same centre. Per-axis on purpose, unlike `crops.pad_box`'s longer-side
+    margin, which would turn a wide box nearly square at p=2.
+
+    Deliberately a run knob, not a snapshot key: it is an augmentation, and the
+    GT eval forces it off (`evaluate.eval_overrides`) so every run is scored on
+    the same boxes. Masklets are still linked from the clean boxes, so the
+    sample set does not move; only the crop windows and the prompts see it.
+    """
+    enabled: bool = False
+    pad_min: float = 0.5
+    pad_max: float = 2.0
+    seed: int = 0
+
+
+@dataclass
 class PromptConfig:
     box_source: str = "annotations"
     detector_boxes_path: str | None = None
@@ -101,6 +119,7 @@ class PromptConfig:
     bbox_event_grouping: EventGroupingParams = field(default_factory=EventGroupingParams)
     bbox_boundary_extend: BoundaryExtendParams = field(default_factory=BoundaryExtendParams)
     bbox_repair: BboxRepairParams = field(default_factory=BboxRepairParams)
+    box_jitter: BoxJitterParams = field(default_factory=BoxJitterParams)
 
 
 @dataclass
@@ -412,6 +431,10 @@ def _check_crop(crop: CropConfig) -> None:
 
 
 def _check_prompt(prompt: PromptConfig) -> None:
+    jitter = prompt.box_jitter
+    if not 0.0 <= jitter.pad_min <= jitter.pad_max:
+        raise ValueError(f"prompt.box_jitter needs 0 <= pad_min <= pad_max; got "
+                         f"{jitter.pad_min!r}, {jitter.pad_max!r}")
     if prompt.box_source not in BOX_SOURCES:
         raise ValueError(f"prompting.box_source must be one of {list(BOX_SOURCES)}; "
                          f"got {prompt.box_source!r}")

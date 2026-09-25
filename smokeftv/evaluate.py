@@ -62,11 +62,18 @@ class EvalParams:
     conditional_reprompt_iou: float = 0.5
 
 
-def eval_overrides(gt_root: str) -> list[str]:
+def eval_overrides(gt_root: str, box_jitter: tuple[float, float] | None = None
+                   ) -> list[str]:
     """What turns a run's training config into its test-set config, and nothing
-    more: the data root, and the two clip knobs that are random draws."""
+    more: the data root, the two clip knobs that are random draws, and the box
+    jitter — off unless asked for, and then the SAME band for every run, so a
+    run trained with jitter is not scored on its own augmentation."""
+    jitter = (["prompt.box_jitter.enabled=false"] if box_jitter is None else
+              ["prompt.box_jitter.enabled=true", "prompt.box_jitter.seed=0",
+               f"prompt.box_jitter.pad_min={box_jitter[0]}",
+               f"prompt.box_jitter.pad_max={box_jitter[1]}"])
     return [f"data.root={gt_root}", "data.clips.stride_jitter=0",
-            "data.clips.reverse_prob=0.0"]
+            "data.clips.reverse_prob=0.0", *jitter]
 
 
 def eval_clips(cfg):

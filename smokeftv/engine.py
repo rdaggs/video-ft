@@ -14,6 +14,7 @@ Three placement rules that are correctness, not tuning:
 
 from __future__ import annotations
 
+import functools
 import logging
 import math
 import time
@@ -129,6 +130,22 @@ def _prepare_feats(tracker, images, cfg):
     return out
 
 
+@functools.lru_cache(maxsize=1)
+def _eval_params():
+    from smokeftv import config_all
+    from smokeftv.evaluate import EvalParams
+    ev = config_all.load()["eval_video"]
+    return EvalParams(keyframe_every=int(ev.get("keyframe_every", 8)),
+                      conditional_reprompt_iou=float(ev.get("conditional_reprompt_iou", 0.5)))
+
+
+def _val_policy(cfg, length: int, boxes):
+    from smokeftv.evaluate import _policy
+    from smokeftv.postprocess import PocParams
+    return _policy(cfg.train.inference_mode, length, _eval_params(), boxes,
+                   cfg.crop.image_size, PocParams())
+
+
 def run_epoch(tracker, loader, cfg, *, epoch: int, optimizer=None, scheduler=None,
               criterion=None, log_every: int = 50, train: bool = True,
               probe_first: bool = False):
@@ -136,7 +153,7 @@ def run_epoch(tracker, loader, cfg, *, epoch: int, optimizer=None, scheduler=Non
     device = cfg.device
     criterion = criterion or MaskLoss(cfg.train.loss)
     totals = {"loss": 0.0, "iou": 0.0, "iou_best": 0.0, "iou_selected": 0.0,
-              "n": 0, "zero_grad_frames": 0}
+              "prompted": 0.0, "n": 0, "zero_grad_frames": 0}
     by_t: list[float] = []
     by_kind = {"cond": 0.0, "prompted": 0.0, "dropout": 0.0}
     kind_n = {"cond": 0, "prompted": 0, "dropout": 0}
@@ -148,29 +165,34 @@ def run_epoch(tracker, loader, cfg, *, epoch: int, optimizer=None, scheduler=Non
             len(batch["frame_indices"]) if "frame_indices" in batch
             else batch["images"].shape[0],
             cfg.train.dropout, epoch, cfg.data.clips.seed, batch["clip_id"])
-        if not train:
-            # Evaluation always prompts frame 0 only or every frame, per the
-            # arm; the in-training val pass uses the configured inference mode's
-            # simplest form — prompt every frame — so a regression in the memory
-            # path is not masked by a dropout draw.
-            keep_mask = [True] * len(keep_mask)
-
         batch["feats"] = _prepare_feats(tracker, batch["images"], cfg)
         batch["boxes"] = batch["boxes"].to(device)
         batch["targets"] = batch["targets"].to(device)
-        # (1, 1, S, S) — the batch dim is kept: _forward_sam_heads flattens
-        # from dim 1 for the presence test, and track_step_train expands it
-        # across the candidate axis for the memory-mask selection.
-        batch["targets_high"] = [
-            torch.nn.functional.interpolate(
-                batch["targets"][t][None, None], size=(cfg.crop.image_size,) * 2,
-                mode="nearest") for t in range(batch["targets"].shape[0])]
+        reprompt = None
+        if train:
+            # (1, 1, S, S) — the batch dim is kept: _forward_sam_heads flattens
+            # from dim 1 for the presence test, and track_step_train expands it
+            # across the candidate axis for the memory-mask selection.
+            batch["targets_high"] = [
+                torch.nn.functional.interpolate(
+                    batch["targets"][t][None, None], size=(cfg.crop.image_size,) * 2,
+                    mode="nearest") for t in range(batch["targets"].shape[0])]
+        else:
+            # Val is inference: train.inference_mode's prompting policy, taken
+            # from the same code eval_video scores with, and no GT inside the
+            # rollout — with it, supervised_best picks the memory candidate
+            # from the answer and force_obj_appearing hides a presence miss.
+            keep_mask, reprompt = _val_policy(cfg, len(keep_mask), batch["boxes"])
+            batch["targets_high"] = None
 
         if probe_first and step == 0:
             probe = BankProbe().attach(tracker)
 
         with autocast_for(cfg):
-            outs, labels = rollout_clip(tracker, batch, cfg, keep_mask=keep_mask)
+            outs, labels = rollout_clip(tracker, batch, cfg, keep_mask=keep_mask,
+                                        reprompt=reprompt)
+        # What actually carried a box, conditional re-prompts included.
+        keep_mask = [label["prompted"] for label in labels]
         loss, stats = clip_loss(cfg, criterion, outs, batch, keep_mask)
 
         if probe is not None and step == 0:
@@ -193,6 +215,7 @@ def run_epoch(tracker, loader, cfg, *, epoch: int, optimizer=None, scheduler=Non
         totals["iou"] += sum(stats["iou_by_t"]) / len(stats["iou_by_t"])
         totals["iou_best"] += stats["iou_best"]
         totals["iou_selected"] += stats["iou_selected"]
+        totals["prompted"] += sum(keep_mask) / len(keep_mask)
         totals["zero_grad_frames"] += stats["zero_grad_frames"]
         totals["n"] += 1
         if not by_t:
@@ -216,6 +239,7 @@ def run_epoch(tracker, loader, cfg, *, epoch: int, optimizer=None, scheduler=Non
         "iou_fused": totals["iou"] / n,
         "iou_best": totals["iou_best"] / n,
         "iou_selected": totals["iou_selected"] / n,
+        "prompted_frac": totals["prompted"] / n,
         "iou_by_t": [v / n for v in by_t],
         "iou_by_kind": {k: (by_kind[k] / kind_n[k] if kind_n[k] else float("nan"))
                         for k in by_kind},

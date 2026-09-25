@@ -271,6 +271,7 @@ def main() -> int:
         row = {"epoch": epoch, "split": split, "t_utc": runlog.utcnow(), "lr": lr,
                "loss": round(stats["loss"], 5),
                **{m: round(stats[m], 5) for m in VAL_METRICS},
+               "prompted_frac": round(stats["prompted_frac"], 4),
                "clips": stats["clips"], "secs": stats["secs"],
                "zero_grad_frames": stats["zero_grad_frames"]}
         metrics.write({**row, "iou_by_t": [round(v, 4) for v in stats["iou_by_t"]],
@@ -288,8 +289,9 @@ def main() -> int:
                           criterion=criterion, log_every=cfg.train.log_every,
                           probe_first=cfg.model.memory.log_bank_composition)
         record("val", 0, stats, cfg.train.lr)
-        log.info("  val e0  loss %.4f iou_fused %.4f (best-of-3 %.4f)  by_t %s  "
-                 "by_kind %s", stats["loss"], stats["iou"], stats["iou_best"],
+        log.info("  val e0  loss %.4f iou_fused %.4f (best-of-3 %.4f)  boxed %.2f  "
+                 "by_t %s  by_kind %s", stats["loss"], stats["iou"], stats["iou_best"],
+                 stats["prompted_frac"],
                  [round(v, 3) for v in stats["iou_by_t"]],
                  {k: round(v, 3) for k, v in stats["iou_by_kind"].items() if v == v})
         best_score = stats[select]
@@ -322,8 +324,9 @@ def main() -> int:
                                    log_every=cfg.train.log_every)
             record("val", epoch, vstats, lr)
             log.info("  val e%d  loss %.4f iou_fused %.4f (best-of-3 %.4f)  "
-                     "by_t %s  by_kind %s",
+                     "boxed %.2f  by_t %s  by_kind %s",
                      epoch, vstats["loss"], vstats["iou"], vstats["iou_best"],
+                     vstats["prompted_frac"],
                      [round(v, 3) for v in vstats["iou_by_t"]],
                      {k: round(v, 3) for k, v in vstats["iou_by_kind"].items()
                       if v == v})

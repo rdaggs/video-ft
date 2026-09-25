@@ -52,6 +52,32 @@ def boxes_for_source(prompt_cfg, root: str | Path, incident: str) -> dict:
         "`detector_prompts`.")
 
 
+def jitter_boxes(boxes_by_frame: dict, jitter, incident: str, image_hw) -> dict:
+    """`boxes_by_frame` with every box padded per `prompt.box_jitter`.
+
+    Seeded by (seed, incident, frame, box) rather than drawn from a stream, so
+    the corpus's crop windows and the dataset's prompts — built in different
+    processes — see the SAME padded box for a frame. The draw is therefore
+    fixed across epochs; diversity comes from the corpus, not from revisits.
+    """
+    if not jitter.enabled:
+        return boxes_by_frame
+    img_h, img_w = image_hw
+    out = {}
+    for frame, boxes in boxes_by_frame.items():
+        padded = []
+        for i, (left, top, right, bottom) in enumerate(boxes):
+            digest = hashlib.sha256(
+                f"{jitter.seed}:{incident}:{frame}:{i}".encode()).digest()
+            p = random.Random(int.from_bytes(digest[:8], "big")).uniform(
+                jitter.pad_min, jitter.pad_max)
+            dx, dy = p / 2.0 * (right - left), p / 2.0 * (bottom - top)
+            padded.append((max(0.0, left - dx), max(0.0, top - dy),
+                           min(float(img_w), right + dx), min(float(img_h), bottom + dy)))
+        out[frame] = padded
+    return out
+
+
 def prompt_rng(seed: int, epoch: int, clip_id: str) -> random.Random:
     """Seeded by identity, not stream position, for the same reason
     `clips.clip_rng` is: so the schedule is reproducible from the run record

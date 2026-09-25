@@ -47,6 +47,10 @@ def setup_logging(run_dir: Path, name: str = "smokeftv") -> logging.Logger:
     logger = logging.getLogger(name)
     logger.setLevel(logging.INFO)
     logger.handlers.clear()
+    # Do not propagate to root. Importing sam3 pulls in libraries that configure
+    # the root logger, and every line would otherwise appear twice — once
+    # formatted and once as `INFO:smokeftv:...`.
+    logger.propagate = False
     fmt = logging.Formatter("%(asctime)s %(message)s", "%H:%M:%S")
     for handler in (logging.StreamHandler(sys.stdout),
                     logging.FileHandler(run_dir / "train.log")):

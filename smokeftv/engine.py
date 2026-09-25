@@ -72,7 +72,7 @@ def clip_loss(cfg, criterion: MaskLoss, outs, batch, keep_mask):
         per_t.append(iou)
         kind = "cond" if t == 0 else ("prompted" if keep_mask[t] else "dropout")
         per_kind[kind].append(iou)
-        if float(out.object_score_logits.min()) <= 0:
+        if float(out.object_score_logits.detach().min()) <= 0:
             zero_grad_frames += 1
 
     return total / max(weight_sum, 1e-8), {

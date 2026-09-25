@@ -337,3 +337,21 @@ def main() -> int:
                              finished_utc=runlog.utcnow(),
                              best={"score": best_score, "epoch": best_epoch})
     return 0
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except SystemExit:
+        raise
+    except BaseException:
+        # Tracebacks go to stderr, which train.log never sees. Mirror the cause
+        # into it, and distinguish an interrupt — where the location it happened
+        # to land on is noise — from a failure, where it is the whole point.
+        import logging
+        logger = logging.getLogger("smokeftv")
+        if sys.exc_info()[0] is KeyboardInterrupt:
+            logger.info("INTERRUPTED")
+        else:
+            logger.info("FAILED: %s", traceback.format_exc())
+        raise

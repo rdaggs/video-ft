@@ -178,7 +178,7 @@ def run_epoch(tracker, loader, cfg, *, epoch: int, optimizer=None, scheduler=Non
                 if scheduler is not None:
                     scheduler.step()
 
-        totals["loss"] += float(loss)
+        totals["loss"] += float(loss.detach())
         totals["iou"] += sum(stats["iou_by_t"]) / len(stats["iou_by_t"])
         totals["zero_grad_frames"] += stats["zero_grad_frames"]
         totals["n"] += 1

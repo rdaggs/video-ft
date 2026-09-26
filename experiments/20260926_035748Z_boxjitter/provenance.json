@@ -1,0 +1,216 @@
+{
+  "schema": 1,
+  "run_name": "20260926_035748Z_boxjitter",
+  "tag": "boxjitter",
+  "status": "finished",
+  "started_utc": "2026-09-26T03:57:51Z",
+  "finished_utc": "2026-09-26T08:37:07Z",
+  "argv": [
+    "/home/rileydaggs/projects/video-ft/scripts/train.py",
+    "--config",
+    "configs/train_video.yaml",
+    "--run-name",
+    "20260926_035748Z_boxjitter",
+    "--ckpt-dir",
+    "ckpts/20260926_035748Z_boxjitter",
+    "--tag",
+    "boxjitter",
+    "--git-sha",
+    "ffe6d45",
+    "--git-dirty",
+    "0",
+    "prompt.box_jitter.enabled=true",
+    "prompt.box_jitter.pad_min=0.5",
+    "prompt.box_jitter.pad_max=2.0"
+  ],
+  "config_path": "configs/train_video.yaml",
+  "overrides": [
+    "prompt.box_jitter.enabled=true",
+    "prompt.box_jitter.pad_min=0.5",
+    "prompt.box_jitter.pad_max=2.0"
+  ],
+  "ckpt_dir": "/home/rileydaggs/projects/video-ft/ckpts/20260926_035748Z_boxjitter",
+  "log_path": "logs/20260926_035748Z_boxjitter.log",
+  "git": {
+    "sha": "ffe6d45",
+    "branch": "main",
+    "dirty": false,
+    "source": "train.sh"
+  },
+  "sam3": {
+    "sha": "8f0b7f4",
+    "branch": "main",
+    "dirty": false
+  },
+  "snapshot": {
+    "path": "training_config.yaml",
+    "sha256": "220e19714702dad69769f0036d961ea1c4507d383feef18d84630264aef9fe79",
+    "divergences": [
+      "no_two_plume",
+      "detector_prompts",
+      "no_smokebase",
+      "bbox_repair_for_baseline",
+      "fuse_fill_frac",
+      "memory_conditioning",
+      "test_split_is_not_the_gt_set",
+      "crop_mode",
+      "windowing_inherited",
+      "bbox_propagate",
+      "frame_cap"
+    ]
+  },
+  "init_from": {
+    "path": "/home/rileydaggs/projects/sam3-finetuned-cvf/ckpts_best/L4E-2/best.pt",
+    "sha256": "a8abf122abc3d90fad4f48f910999820edd7a60afddb47894d5e0db87b66cb2a"
+  },
+  "code": {
+    "__init__.py": {
+      "sha256": "2cbfaccbf414c8f3",
+      "bytes": 281
+    },
+    "boxes.py": {
+      "sha256": "6034d09c004dc3be",
+      "bytes": 16847
+    },
+    "checkpoint.py": {
+      "sha256": "93afede8ce4b04cf",
+      "bytes": 10224
+    },
+    "clips.py": {
+      "sha256": "d87ca41060824418",
+      "bytes": 8292
+    },
+    "config.py": {
+      "sha256": "e205249aebfa48e5",
+      "bytes": 25311
+    },
+    "config_all.py": {
+      "sha256": "730106c60b6eaeb6",
+      "bytes": 29065
+    },
+    "corpus.py": {
+      "sha256": "3f93df98fc32afee",
+      "bytes": 6465
+    },
+    "crops.py": {
+      "sha256": "19a837fc186f7102",
+      "bytes": 11402
+    },
+    "dataset.py": {
+      "sha256": "24fa85a5d188751a",
+      "bytes": 4897
+    },
+    "engine.py": {
+      "sha256": "29a212d1d9be680e",
+      "bytes": 12022
+    },
+    "evaluate.py": {
+      "sha256": "09af322b8b80d461",
+      "bytes": 11338
+    },
+    "incidents.py": {
+      "sha256": "8676a1e4a508578a",
+      "bytes": 6020
+    },
+    "losses.py": {
+      "sha256": "b68741ed23eb2821",
+      "bytes": 5002
+    },
+    "masklets.py": {
+      "sha256": "22823394126ec9aa",
+      "bytes": 12817
+    },
+    "masks.py": {
+      "sha256": "e28f09c6bdf41bb0",
+      "bytes": 1684
+    },
+    "metrics.py": {
+      "sha256": "6ea655bb69c39d08",
+      "bytes": 5383
+    },
+    "model.py": {
+      "sha256": "d43189663cfcb8e6",
+      "bytes": 15154
+    },
+    "postprocess.py": {
+      "sha256": "f42f1e8f278855e3",
+      "bytes": 11743
+    },
+    "preprocess.py": {
+      "sha256": "cb8bf01acf00674d",
+      "bytes": 2108
+    },
+    "prompting.py": {
+      "sha256": "fbfe4e21b7d15e4c",
+      "bytes": 6092
+    },
+    "rollout.py": {
+      "sha256": "055bc3540e3cc7a7",
+      "bytes": 6391
+    },
+    "runlog.py": {
+      "sha256": "f2a5fe9548e2faf4",
+      "bytes": 9044
+    },
+    "track_step.py": {
+      "sha256": "86a2ebceb805000b",
+      "bytes": 7569
+    }
+  },
+  "geometry": {
+    "vendored": "b7b96e719ed072ad"
+  },
+  "env": {
+    "python": "3.12.13",
+    "host": "lambda-server-1",
+    "user": "rileydaggs",
+    "cuda_visible_devices": "6",
+    "torch": "2.11.0+cu128",
+    "cuda": "12.8",
+    "gpu_name": "NVIDIA RTX 6000 Ada Generation",
+    "gpu_count": 1,
+    "cv2": "4.11.0",
+    "numpy": "1.26.4"
+  },
+  "corpus": {
+    "data_root": "/home/rileydaggs/data/cvf-2026",
+    "clip_seed": 20260924,
+    "clip_signature": "06400a83716793ff8306425a9e7132d85b43e86162872c9d494acd28b874d40b",
+    "train_clips": 2204,
+    "val_clips": 223,
+    "train_incidents": 157
+  },
+  "model": {
+    "trainable_tensors": 161,
+    "trainable_params": 7522033,
+    "param_groups": [
+      {
+        "name": "memory",
+        "tensors": 159,
+        "lr": 0.0
+      }
+    ],
+    "num_maskmem": 7,
+    "max_cond_frames_in_attn": 2
+  },
+  "resume_fingerprint": {
+    "param_groups": [
+      {
+        "name": "memory",
+        "tensors": 159,
+        "numel": 7522016
+      }
+    ],
+    "steps_per_epoch": 1102,
+    "epochs": 8,
+    "lr_schedule": "cosine",
+    "train_clips": 2204,
+    "select_metric": "iou_fused",
+    "clip_signature": "06400a83716793ff8306425a9e7132d85b43e86162872c9d494acd28b874d40b",
+    "feature_cache_key": ""
+  },
+  "best": {
+    "score": 0.6390073358579277,
+    "epoch": 4
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "note": "best.pt is committed beside this file (`in_git`); the rest stay on /data3 at `path`. A checkpoint is a sparse overlay of requires_grad tensors and loads ON TOP of init_from (see smokeftv.checkpoint).",
+  "init_from": {
+    "path": "/home/rileydaggs/projects/sam3-finetuned-cvf/ckpts_best/L4E-2/best.pt",
+    "sha256": "a8abf122abc3d90fad4f48f910999820edd7a60afddb47894d5e0db87b66cb2a"
+  },
+  "checkpoints": [
+    {
+      "file": "best.pt",
+      "path": "/data3/rileydaggs/sam3-video-cvf/ckpts/20260925_224922Z_control/best.pt",
+      "bytes": 30130056,
+      "sha256": "fdbe1337396bc878f7fcac2530b45e1c06c1a39944c71dd79e8dba608e316ed2",
+      "in_git": "experiments/20260925_224922Z_control/best.pt",
+      "meta": {
+        "epoch": 3,
+        "run_name": "20260925_224922Z_control",
+        "select_metric": "iou_fused",
+        "iou_fused": 0.6859837929285424
+      }
+    },
+    {
+      "file": "last.pt",
+      "path": "/data3/rileydaggs/sam3-video-cvf/ckpts/20260925_224922Z_control/last.pt",
+      "bytes": 30130056,
+      "sha256": "1d8b77309c90a43deedf2a22690fac9b376fd9533674e577eacc7e45cfbe944c",
+      "in_git": null,
+      "meta": {
+        "epoch": 8,
+        "run_name": "20260925_224922Z_control"
+      }
+    },
+    {
+      "file": "last_resume.pt",
+      "path": "/data3/rileydaggs/sam3-video-cvf/ckpts/20260925_224922Z_control/last_resume.pt",
+      "bytes": 60321807,
+      "sha256": "b79df2adcb94c3e75e7ecff16d2f60a5436f63eebe2eea158bf035b00580b9c9",
+      "in_git": null,
+      "meta": {
+        "epoch": 8,
+        "kind": "resume state"
+      }
+    }
+  ]
+}

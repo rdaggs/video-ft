@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "run": "20260925_224922Z_control",
+  "cache_key": "76b304dfd677adb6",
+  "data_root": "/home/rileydaggs/data/segmentation-test-set-new",
+  "box_jitter": null,
+  "config_source": "/home/rileydaggs/projects/video-ft/ckpts/20260925_224922Z_control/config_resolved.yaml",
+  "config_sha256": "682375f8b1e22250fc7ffada4a86f6bd11311f966bebc0383faddfd35859bbbc",
+  "modes": [
+    "prompt_every_frame",
+    "keyframe",
+    "conditional"
+  ],
+  "eval": {
+    "modes": [
+      "prompt_every_frame",
+      "keyframe",
+      "conditional"
+    ],
+    "keyframe_every": 8,
+    "conditional_reprompt_iou": 0.5
+  },
+  "incidents": [
+    "1022308_ec-100-4_1488412_1489090",
+    "1022308_ec-164-3_1243865_1244543",
+    "1029713_ec-241-0_1053975_1054375",
+    "1045318_ec-201-1_1193662_1194160",
+    "1056185_ec-449-3_452383_453906",
+    "1065181_ec-430-1_483996_485055",
+    "1065181_ec-437-2_476575_477634",
+    "1065181_ec-437-3_476575_477634",
+    "1083899_ec-223-1_1147452_1147706",
+    "1090875_ec-340-0_699898_699990",
+    "1090875_ec-349-3_648246_648337",
+    "1099811_ec-434-2_496807_497486",
+    "1138080_ec-415-0_521498_522465",
+    "1160106_ec-339-4_723141_723325",
+    "1160106_ec-353-0_669795_669979",
+    "1179436_ec-258-3_1005013_1005094",
+    "1217888_ec-214-4_1190735_1190957",
+    "1662246_ec-331-6_862450_863051",
+    "1664350_ec-481-7_573433_574094",
+    "1664523_ec-131-6_1522075_1522607",
+    "1664523_ec-137-4_1467502_1468034",
+    "1849472_ec-566-2_521498_522604",
+    "318935_ec-95-0_1211472_1211508",
+    "324356_ec-325-2_260561_260670",
+    "328226_ec-95-2_1221265_1221725",
+    "3_279_04042026_ec-279-7_952470_953591",
+    "921196_ec-164-0_1196724_1196907"
+  ],
+  "num_incidents": 27,
+  "num_clips": 449,
+  "sample_limit": null,
+  "trained_incidents": [],
+  "trained_cameras": [],
+  "warnings": [],
+  "arms": [
+    {
+      "name": "init",
+      "ckpt": null,
+      "overlays": [
+        "/home/rileydaggs/projects/sam3-finetuned-cvf/ckpts_best/L4E-2/best.pt"
+      ],
+      "overlay_sha256": [
+        "a8abf122abc3d90fad4f48f910999820edd7a60afddb47894d5e0db87b66cb2a"
+      ],
+      "cache_dir": "/data3/rileydaggs/sam3-video-cvf/eval_cache/gt_test_set/76b304dfd677adb6/init-a8abf122abc3d90f"
+    },
+    {
+      "name": "finetuned",
+      "ckpt": "/home/rileydaggs/projects/video-ft/ckpts/20260925_224922Z_control/best.pt",
+      "overlays": [
+        "/home/rileydaggs/projects/sam3-finetuned-cvf/ckpts_best/L4E-2/best.pt",
+        "/home/rileydaggs/projects/video-ft/ckpts/20260925_224922Z_control/best.pt"
+      ],
+      "overlay_sha256": [
+        "a8abf122abc3d90fad4f48f910999820edd7a60afddb47894d5e0db87b66cb2a",
+        "fdbe1337396bc878f7fcac2530b45e1c06c1a39944c71dd79e8dba608e316ed2"
+      ],
+      "cache_dir": "/data3/rileydaggs/sam3-video-cvf/eval_cache/gt_test_set/76b304dfd677adb6/ckpt-fdbe1337396bc878"
+    }
+  ],
+  "scored_utc": "2026-09-26T03:46:45Z"
+}

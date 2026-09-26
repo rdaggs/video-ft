@@ -1,0 +1,798 @@
+{
+  "data_root": "/home/rileydaggs/data/cvf-2026",
+  "corpus": {
+    "data_root": "/home/rileydaggs/data/cvf-2026",
+    "clip_seed": 20260924,
+    "clip_signature": "5ab5f31414e5f05b6fee8b53d0862acf51b6d73a8d76ea5b4cff99d488e21a18",
+    "train_clips": 2044,
+    "val_clips": 223,
+    "train_incidents": 145
+  },
+  "train": {
+    "1001646_ec-366-4_532853_533123": {
+      "annotations.json": "355fb434b1836714",
+      "polygons.coco.json": "a190eaeef7e251d7"
+    },
+    "1001646_ec-454-3_430571_430840": {
+      "annotations.json": "9ddac80757de6eb8",
+      "polygons.coco.json": "0b82a3b8bca2858b"
+    },
+    "1022308_ec-119-2_1396630_1397308": {
+      "annotations.json": "4e65b551c21dbf2e",
+      "polygons.coco.json": "4e2f80a8d7374255"
+    },
+    "1022308_ec-167-1_1241049_1241727": {
+      "annotations.json": "3a1129e3aa30017d",
+      "polygons.coco.json": "a6ac24d5f6bf327d"
+    },
+    "1022308_ec-228-4_1122654_1123331": {
+      "annotations.json": "a00bf12edb88b986",
+      "polygons.coco.json": "626704689b08db30"
+    },
+    "1022308_ec-231-4_1122596_1123274": {
+      "annotations.json": "d8b34554f360338b",
+      "polygons.coco.json": "4db8c0effbc1f9df"
+    },
+    "1022308_ec-343-4_672021_672699": {
+      "annotations.json": "2f9726ddbeeb1810",
+      "polygons.coco.json": "b2da9bb59cf9d299"
+    },
+    "1022992_ec-245-0_1020526_1020947": {
+      "annotations.json": "acee8aa042d5de05",
+      "polygons.coco.json": "19825d7a3b7bccc9"
+    },
+    "1023953_ec-328-4_699922_702560": {
+      "annotations.json": "dd850c51261c1aed",
+      "polygons.coco.json": "23e63eaece12dc08"
+    },
+    "1029660_ec-411-3_483667_484045": {
+      "annotations.json": "16bd437da063c6b1",
+      "polygons.coco.json": "dc34a0417c712959"
+    },
+    "1031012_ec-373-4_518427_519476": {
+      "annotations.json": "52d19bfa8a30bebe",
+      "polygons.coco.json": "cd2b1f771ecbb260"
+    },
+    "1031012_ec-374-1_518392_519441": {
+      "annotations.json": "b8d05e307f494895",
+      "polygons.coco.json": "8de94e160e8206b0"
+    },
+    "1031012_ec-379-1_512740_513790": {
+      "annotations.json": "f8c0eb1f11e686dd",
+      "polygons.coco.json": "cbab12f602663a61"
+    },
+    "1031012_ec-422-3_474054_475103": {
+      "annotations.json": "bcddb5967ba91051",
+      "polygons.coco.json": "02e2b122b303c43d"
+    },
+    "1031012_ec-426-1_472496_473545": {
+      "annotations.json": "59544b11eaab7501",
+      "polygons.coco.json": "27c4bd45d9fce259"
+    },
+    "1056185_ec-350-0_632245_633769": {
+      "annotations.json": "1fc66d464511b7bc",
+      "polygons.coco.json": "202a7bd61db6e30f"
+    },
+    "1056185_ec-359-2_567198_568721": {
+      "annotations.json": "163b1c0ae1c86df2",
+      "polygons.coco.json": "883addedf75843a1"
+    },
+    "1056185_ec-387-2_512602_514126": {
+      "annotations.json": "fe3db88114f66bcb",
+      "polygons.coco.json": "0c63d2a30aabbb54"
+    },
+    "1065181_ec-381-3_522864_523923": {
+      "annotations.json": "99242f536efd3fa5",
+      "polygons.coco.json": "8e486450ae5d4910"
+    },
+    "1065181_ec-405-4_500989_502048": {
+      "annotations.json": "b00c61fb6fff58b6",
+      "polygons.coco.json": "9b9ffd8fa7fc4f96"
+    },
+    "1065181_ec-407-3_496968_498027": {
+      "annotations.json": "9914151c9fea3657",
+      "polygons.coco.json": "47899e304a0bee70"
+    },
+    "1067921_ec-215-2_1141812_1142445": {
+      "annotations.json": "54a8ade1a7d70a01",
+      "polygons.coco.json": "1761af4d3f1cd3a7"
+    },
+    "1067921_ec-461-4_447697_448330": {
+      "annotations.json": "f739668551699bf8",
+      "polygons.coco.json": "1726500916c91059"
+    },
+    "1067921_ec-504-4_404833_405466": {
+      "annotations.json": "5eebf9c6383fe3eb",
+      "polygons.coco.json": "b68a4d73e4c776f2"
+    },
+    "1083899_ec-344-3_695678_695931": {
+      "annotations.json": "2a708799c99ccfa7",
+      "polygons.coco.json": "0266cc5ecc3a2353"
+    },
+    "1083899_ec-390-2_524066_524319": {
+      "annotations.json": "d08bcb8cd53ed71f",
+      "polygons.coco.json": "3e94cbc3521a57c1"
+    },
+    "1083899_ec-410-0_505371_505625": {
+      "annotations.json": "6d802a237dac8a68",
+      "polygons.coco.json": "10ba2e0f5733ac16"
+    },
+    "1084264_ec-236-3_1090214_1090411": {
+      "annotations.json": "cec01b5b7695d632",
+      "polygons.coco.json": "65bb7b7375072d35"
+    },
+    "1086074_ec-212-1_1150466_1150750": {
+      "annotations.json": "276c7affdcea6d67",
+      "polygons.coco.json": "4dcbf2ccddf1e515"
+    },
+    "1086074_ec-219-1_1150273_1150556": {
+      "annotations.json": "c3bfa0fd527404ae",
+      "polygons.coco.json": "532756284ffe75a5"
+    },
+    "1086074_ec-417-2_503968_504251": {
+      "annotations.json": "e86c2c1ec1d8a82e",
+      "polygons.coco.json": "06ac681d7c39c318"
+    },
+    "1086074_ec-504-2_413348_413631": {
+      "annotations.json": "173516cb8b4ade2e",
+      "polygons.coco.json": "a66d6873c19a78d5"
+    },
+    "1086219_ec-107-4_1464247_1464392": {
+      "annotations.json": "02b834a5bc7f1a3b",
+      "polygons.coco.json": "401a727bda6cfe24"
+    },
+    "1086219_ec-119-3_1422731_1422876": {
+      "annotations.json": "ab270dfb21d9a86f",
+      "polygons.coco.json": "7c1b8c3f45488007"
+    },
+    "1086219_ec-167-3_1267150_1267295": {
+      "annotations.json": "49858ef253e76da2",
+      "polygons.coco.json": "291061187a0c9ec9"
+    },
+    "1086219_ec-343-4_698122_698267": {
+      "annotations.json": "090c84d05d29ed70",
+      "polygons.coco.json": "09031c5b49fe7603"
+    },
+    "1086219_ec-410-2_506753_506898": {
+      "annotations.json": "d65c09e351b7a7e8",
+      "polygons.coco.json": "1521ef86dae3685d"
+    },
+    "1123001_ec-155-3_1298706_1298788": {
+      "annotations.json": "bef8b757b317e71f",
+      "polygons.coco.json": "1adb41c3439fc7a7"
+    },
+    "1138080_ec-373-2_558618_559584": {
+      "annotations.json": "771561b3fc4aa43c",
+      "polygons.coco.json": "11ab3c3d6a5fd774"
+    },
+    "1138080_ec-374-2_558583_559549": {
+      "annotations.json": "6e19e3889052031c",
+      "polygons.coco.json": "7feb163d86ed25ce"
+    },
+    "1138080_ec-379-0_552932_553898": {
+      "annotations.json": "30f3dab71dc1d98a",
+      "polygons.coco.json": "1591092493ad7b86"
+    },
+    "1138080_ec-405-2_528301_529267": {
+      "annotations.json": "01899b54dbe70c71",
+      "polygons.coco.json": "9540299652d30f94"
+    },
+    "1143269_ec-372-4_560031_560130": {
+      "annotations.json": "68902e8c6efbee6e",
+      "polygons.coco.json": "2a12863b80b9228f"
+    },
+    "1143269_ec-391-0_544237_544337": {
+      "annotations.json": "152a0759fa64b6cf",
+      "polygons.coco.json": "80402aabd01c4984"
+    },
+    "1144553_ec-381-3_551830_552893": {
+      "annotations.json": "c6e0eda2a6addaef",
+      "polygons.coco.json": "0d7018f9e39adc5a"
+    },
+    "1144553_ec-407-1_525934_526998": {
+      "annotations.json": "f249eba40f542ee3",
+      "polygons.coco.json": "5d06fc725a73421b"
+    },
+    "1144553_ec-429-0_514204_515267": {
+      "annotations.json": "b8b902059114f815",
+      "polygons.coco.json": "d52e50e4d05b3071"
+    },
+    "1151608_ec-219-4_1172102_1172277": {
+      "annotations.json": "9b1b619354dd880f",
+      "polygons.coco.json": "c0b946fc205ee101"
+    },
+    "1160106_ec-404-2_535711_535894": {
+      "annotations.json": "c1cf757f6b22c060",
+      "polygons.coco.json": "936e78f003c11655"
+    },
+    "1160106_ec-419-0_527256_527439": {
+      "annotations.json": "2838b96e19191833",
+      "polygons.coco.json": "5129119d0c1099d5"
+    },
+    "1173104_ec-411-3_535500_535737": {
+      "annotations.json": "0819c199d6fd5cc5",
+      "polygons.coco.json": "62fba5208cd21a1b"
+    },
+    "1174973_ec-381-1_561786_561887": {
+      "annotations.json": "50767a678611603b",
+      "polygons.coco.json": "4f719768cb6f16be"
+    },
+    "1174973_ec-407-4_535891_535992": {
+      "annotations.json": "65b5faa295f2bb6e",
+      "polygons.coco.json": "f8aac07c1c6b0e90"
+    },
+    "1176957_ec-387-3_556893_563993": {
+      "annotations.json": "11652d442a67daee",
+      "polygons.coco.json": "76fcbbffba2e5fb3"
+    },
+    "1176957_ec-487-2_460616_467715": {
+      "annotations.json": "d2c6578dcab62d85",
+      "polygons.coco.json": "f954ff2a94a7f04b"
+    },
+    "1179288_ec-348-2_676851_676928": {
+      "annotations.json": "4611f80989d6f619",
+      "polygons.coco.json": "b2458eac4aed9ceb"
+    },
+    "1179288_ec-390-3_555684_555761": {
+      "annotations.json": "ece4000bde2135f6",
+      "polygons.coco.json": "a339be1070db2148"
+    },
+    "1179436_ec-240-2_1107349_1107430": {
+      "annotations.json": "1f8d95c61c784102",
+      "polygons.coco.json": "4114ccfe5fe9d2c8"
+    },
+    "1185227_ec-212-0_1182120_1182191": {
+      "annotations.json": "f51f630599cce38a",
+      "polygons.coco.json": "d77e37bcc949646d"
+    },
+    "1185227_ec-215-3_1181981_1182051": {
+      "annotations.json": "9ee3f96cf3a78a3d",
+      "polygons.coco.json": "8276a40d4057c7e0"
+    },
+    "1185227_ec-219-2_1181926_1181997": {
+      "annotations.json": "6c399c43f51366ce",
+      "polygons.coco.json": "ee211b39ac3f6944"
+    },
+    "1186851_ec-305-3_855487_855980": {
+      "annotations.json": "2921b3d306a454bd",
+      "polygons.coco.json": "e075d8d9cdff1415"
+    },
+    "1196949_ec-119-4_1457360_1457813": {
+      "annotations.json": "6616b95f7b8bf730",
+      "polygons.coco.json": "9aa53a3df9df7116"
+    },
+    "1196949_ec-167-3_1301779_1302232": {
+      "annotations.json": "c64bc49bca1e93a6",
+      "polygons.coco.json": "ddd9c452150d40a9"
+    },
+    "1196949_ec-344-4_731689_732142": {
+      "annotations.json": "4bdc8e9f19becb84",
+      "polygons.coco.json": "41f77d6f156ec9ea"
+    },
+    "1196949_ec-366-4_601920_602373": {
+      "annotations.json": "9eb42c02950c4563",
+      "polygons.coco.json": "ca3a54b831b47a89"
+    },
+    "1208146_ec-163-4_1308851_1309144": {
+      "annotations.json": "1fa85d88f1e7633c",
+      "polygons.coco.json": "50eef41e616dbb66"
+    },
+    "1208146_ec-167-2_1304708_1305000": {
+      "annotations.json": "cf21f655fa151888",
+      "polygons.coco.json": "8f41c00885c2106a"
+    },
+    "1213042_ec-212-0_1189333_1189410": {
+      "annotations.json": "32b5b3ef4ea57b4f",
+      "polygons.coco.json": "8a9c95a829893458"
+    },
+    "1213042_ec-219-2_1189140_1189216": {
+      "annotations.json": "37f43279a696fcbf",
+      "polygons.coco.json": "ee9cef1e7ff560fa"
+    },
+    "1214063_ec-305-4_862673_863083": {
+      "annotations.json": "1f073568ea89250c",
+      "polygons.coco.json": "de9a2a0d6dd83d5d"
+    },
+    "1217888_ec-215-1_1190709_1190931": {
+      "annotations.json": "8821f2571893d38d",
+      "polygons.coco.json": "a1fe4029ccdc0dfb"
+    },
+    "1217888_ec-263-4_989144_989366": {
+      "annotations.json": "420d9a3eecac9800",
+      "polygons.coco.json": "c1343ae336004d0f"
+    },
+    "1217888_ec-504-1_453730_453952": {
+      "annotations.json": "b9966b2138df4092",
+      "polygons.coco.json": "4753f4b52119229d"
+    },
+    "1222237_ec-115-1_1469885_1469933": {
+      "annotations.json": "4c0149a8acb22dda",
+      "polygons.coco.json": "0faceaaf02c94e5a"
+    },
+    "1222237_ec-364-2_609126_609174": {
+      "annotations.json": "7b78486c3602b2ba",
+      "polygons.coco.json": "22a0624a04f9bfa8"
+    },
+    "1223477_ec-12-3_2493994_2494065": {
+      "annotations.json": "89c9a36977548d8a",
+      "polygons.coco.json": "619f308b1e626310"
+    },
+    "1223477_ec-166-3_1311811_1311882": {
+      "annotations.json": "b580d19a6ef7c3f8",
+      "polygons.coco.json": "3bd1e6e5f140f106"
+    },
+    "1238700_ec-119-4_1468615_1468771": {
+      "annotations.json": "6e0742dcc6ba41d2",
+      "polygons.coco.json": "8bd5953ae76315ec"
+    },
+    "1238700_ec-167-4_1313034_1313191": {
+      "annotations.json": "6c535b22d4a3137d",
+      "polygons.coco.json": "49b30113b0ddec34"
+    },
+    "1238700_ec-348-1_692498_692655": {
+      "annotations.json": "1d70d39de2113403",
+      "polygons.coco.json": "1a08bd5e7abc40e5"
+    },
+    "1241772_ec-280-4_944561_944706": {
+      "annotations.json": "0af7a1f2cd99d8a7",
+      "polygons.coco.json": "37cf586756ec84ee"
+    },
+    "1245489_ec-212-2_1197872_1198150": {
+      "annotations.json": "fdcf1c5af37f4e81",
+      "polygons.coco.json": "9aa389f524a35dd4"
+    },
+    "1246391_ec-238-0_1125766_1126231": {
+      "annotations.json": "55fa209221a29219",
+      "polygons.coco.json": "5a5b104fe6f739d3"
+    },
+    "1248610_ec-391-1_573255_574046": {
+      "annotations.json": "fe0a60aa638c306f",
+      "polygons.coco.json": "27a478a4f43154d0"
+    },
+    "1248610_ec-411-0_554532_555324": {
+      "annotations.json": "dfc3bbc47871b0ee",
+      "polygons.coco.json": "47bc8ad7a0940255"
+    },
+    "1249621_ec-384-0_1266238_1266476": {
+      "annotations.json": "4c7aebf1e9190aed",
+      "polygons.coco.json": "105d1a0552382c3a"
+    },
+    "1254453_ec-143-1_1369320_1371018": {
+      "annotations.json": "14a511b4ef5313a0",
+      "polygons.coco.json": "e3f4b99a205cd53f"
+    },
+    "1662246_ec-305-3_961922_962524": {
+      "annotations.json": "8ef6134365b29113",
+      "polygons.coco.json": "ba2e8ae0f84751f3"
+    },
+    "1663151_ec-361-8_709826_709868": {
+      "annotations.json": "906396cfc997e18f",
+      "polygons.coco.json": "39c6436fe08b7a31"
+    },
+    "1664350_ec-129-7_1522254_1522915": {
+      "annotations.json": "e5986876c96e10f7",
+      "polygons.coco.json": "eabc817f5df02fbd"
+    },
+    "1664539_ec-154-6_1425533_1427982": {
+      "annotations.json": "54034ee38ff19377",
+      "polygons.coco.json": "ee6b47abd14498e8"
+    },
+    "1664539_ec-186-2_1367959_1370408": {
+      "annotations.json": "04b51481318fcbd0",
+      "polygons.coco.json": "a1c28e3fbda85f6b"
+    },
+    "1664539_ec-213-9_1288918_1291367": {
+      "annotations.json": "b058bc4e1518cf45",
+      "polygons.coco.json": "9743ffbe59b112a3"
+    },
+    "1669373_ec-56-2_2087870_2088655": {
+      "annotations.json": "75990d739f70db56",
+      "polygons.coco.json": "63733a08b4e6f128"
+    },
+    "1669829_ec-118-1_1563426_1563749": {
+      "annotations.json": "c54b2f0a07a095b7",
+      "polygons.coco.json": "6317da3829023314"
+    },
+    "1679508_ec-126-1_1530563_1531049": {
+      "annotations.json": "66110c9161d5f4be",
+      "polygons.coco.json": "b72ba01de12c9ae4"
+    },
+    "1679744_ec-620-0_414517_415007": {
+      "annotations.json": "528143ee7688c99d",
+      "polygons.coco.json": "437a066aac2e2401"
+    },
+    "1687438_ec-142-2_1462701_1464996": {
+      "annotations.json": "879a149efcb86bc0",
+      "polygons.coco.json": "346dac873021a28d"
+    },
+    "1687438_ec-361-0_714033_716328": {
+      "annotations.json": "db00c858d976bdca",
+      "polygons.coco.json": "c30992b98675b2f3"
+    },
+    "1688498_ec-275-4_1042514_1042723": {
+      "annotations.json": "6ee08751265df8a7",
+      "polygons.coco.json": "4187126e9897ad13"
+    },
+    "1688498_ec-295-2_972317_972525": {
+      "annotations.json": "833c214d8db5e511",
+      "polygons.coco.json": "5ec8e1234b92cf5d"
+    },
+    "1692553_ec-273-3_1047991_1049147": {
+      "annotations.json": "2be3d9bb67f981a8",
+      "polygons.coco.json": "fdb364c608f23e30"
+    },
+    "1692553_ec-312-8_933053_934209": {
+      "annotations.json": "0c229365ebcb156f",
+      "polygons.coco.json": "8a09f61b9be96e13"
+    },
+    "1694895_ec-527-7_547137_554012": {
+      "annotations.json": "987ba08892ddaca0",
+      "polygons.coco.json": "5683293aa4b18913"
+    },
+    "1696133_ec-448-6_616301_617051": {
+      "annotations.json": "82bc301a4a01281b",
+      "polygons.coco.json": "9903b95542114284"
+    },
+    "1696133_ec-474-3_588995_589745": {
+      "annotations.json": "c4aeafee6f8d0ebc",
+      "polygons.coco.json": "0bca7ebeba30d19d"
+    },
+    "1700328_ec-21-3_2542544_2543092": {
+      "annotations.json": "39d01ebf9b448822",
+      "polygons.coco.json": "75e3206210c1c0d0"
+    },
+    "1700328_ec-235-7_1252432_1252981": {
+      "annotations.json": "b240d8b589f12284",
+      "polygons.coco.json": "9876a4af2e3ca670"
+    },
+    "1700328_ec-314-6_934465_935014": {
+      "annotations.json": "667463f006405ed1",
+      "polygons.coco.json": "2810ddac00515160"
+    },
+    "1700328_ec-53-4_2120701_2121249": {
+      "annotations.json": "c5960f9993b2421f",
+      "polygons.coco.json": "237be7a7494523d2"
+    },
+    "1701431_ec-175-2_1405468_1405680": {
+      "annotations.json": "0cba8651ab6e72cf",
+      "polygons.coco.json": "df94f1e43fb2df84"
+    },
+    "1701431_ec-176-7_1405267_1405479": {
+      "annotations.json": "599e9912557f7e6f",
+      "polygons.coco.json": "807efaa80b53ae62"
+    },
+    "1701431_ec-186-2_1374826_1375038": {
+      "annotations.json": "df31205d35413e06",
+      "polygons.coco.json": "727f27d8cc7e928d"
+    },
+    "1701431_ec-213-9_1295785_1295996": {
+      "annotations.json": "9a07c2f4b9051b64",
+      "polygons.coco.json": "44d9c8230b62816d"
+    },
+    "1701859_ec-287-8_980736_981099": {
+      "annotations.json": "b8f448c4732d0f35",
+      "polygons.coco.json": "12ab26dfd63ea815"
+    },
+    "1702143_ec-284-4_1042475_1042651": {
+      "annotations.json": "b4b0564dc46534a5",
+      "polygons.coco.json": "ca17acd4ab849c6f"
+    },
+    "1705966_ec-301-5_971611_971725": {
+      "annotations.json": "ce8bfe04ba05b498",
+      "polygons.coco.json": "938afefdb42e15d2"
+    },
+    "1707662_ec-287-9_982124_982859": {
+      "annotations.json": "9df319234105e983",
+      "polygons.coco.json": "2ec22e5b7b7e5d7c"
+    },
+    "1709599_ec-284-6_1044233_1044472": {
+      "annotations.json": "57716eece2c89875",
+      "polygons.coco.json": "8b1b98e7fc5586fd"
+    },
+    "1709599_ec-294-5_976823_977062": {
+      "annotations.json": "f9705b87d68e88ed",
+      "polygons.coco.json": "91acae57f0367ffd"
+    },
+    "1715766_ec-305-1_972140_977949": {
+      "annotations.json": "fa1c505335d5cf35",
+      "polygons.coco.json": "7076b0ba81ec0802"
+    },
+    "1715766_ec-800-7_262272_268081": {
+      "annotations.json": "4907f2b5fd70d187",
+      "polygons.coco.json": "92297deb1e07e52d"
+    },
+    "1715766_ec-935-5_130947_136756": {
+      "annotations.json": "c62225e906491500",
+      "polygons.coco.json": "40ac978749e446af"
+    },
+    "1715766_ec-977-0_100799_106608": {
+      "annotations.json": "e56a8d7d76b98eaf",
+      "polygons.coco.json": "634c4ac309c89c1e"
+    },
+    "1720580_ec-568-2_485356_485656": {
+      "annotations.json": "99a1feaad57a654c",
+      "polygons.coco.json": "a8f5723d357407ed"
+    },
+    "1720580_ec-577-9_470772_471073": {
+      "annotations.json": "ce429d0f5a3b4183",
+      "polygons.coco.json": "8522a660fcf160dd"
+    },
+    "1720691_ec-107-0_1613929_1613987": {
+      "annotations.json": "a018a56bf8514107",
+      "polygons.coco.json": "cf850fb990c0e259"
+    },
+    "1722252_ec-166-6_1419789_1419988": {
+      "annotations.json": "dee344464d7a72dc",
+      "polygons.coco.json": "999210fc7be38061"
+    },
+    "1722252_ec-180-0_1400999_1401198": {
+      "annotations.json": "f6519928a359ba3e",
+      "polygons.coco.json": "aca96ae6e7c3cfb0"
+    },
+    "1724266_ec-66-8_2062580_2063088": {
+      "annotations.json": "50f3c68510ef6d88",
+      "polygons.coco.json": "cecbb85c7bd312f0"
+    },
+    "1725004_ec-127-9_1540003_1540208": {
+      "annotations.json": "f710b884dbb1624c",
+      "polygons.coco.json": "f7bc213940b92b56"
+    },
+    "1729832_ec-166-6_1421290_1423358": {
+      "annotations.json": "6f609c58acfec3fb",
+      "polygons.coco.json": "2fd35f52476c8186"
+    },
+    "1729832_ec-179-8_1402539_1404606": {
+      "annotations.json": "e0b60291701de914",
+      "polygons.coco.json": "bcd807b33c03e2cc"
+    },
+    "1729832_ec-180-5_1402500_1404567": {
+      "annotations.json": "455054fe4cc7c74c",
+      "polygons.coco.json": "83d63633af828b13"
+    },
+    "1729832_ec-183-4_1401056_1403123": {
+      "annotations.json": "f567abb12c5a3117",
+      "polygons.coco.json": "7f974e42afb9fc5a"
+    },
+    "1729832_ec-208-9_1330518_1332586": {
+      "annotations.json": "0a9f3792e47dfe84",
+      "polygons.coco.json": "21f6270b79f0df37"
+    },
+    "1729832_ec-64-2_2064916_2066983": {
+      "annotations.json": "72ba19820ee4c7eb",
+      "polygons.coco.json": "d63b5d7dcbc47961"
+    },
+    "1734548_ec-142-3_1472570_1475081": {
+      "annotations.json": "2a1611e4abae9d5d",
+      "polygons.coco.json": "98a79fe44dac3749"
+    },
+    "1734548_ec-367-6_703784_706295": {
+      "annotations.json": "1d94bddc6f8efcdf",
+      "polygons.coco.json": "a30ba34877f4ab8d"
+    },
+    "1734805_ec-539-2_528140_528521": {
+      "annotations.json": "2ef61acecd3d7abe",
+      "polygons.coco.json": "55ed025621860d90"
+    },
+    "1734805_ec-564-1_506814_507195": {
+      "annotations.json": "182143271e952134",
+      "polygons.coco.json": "d4521e17be1ae01a"
+    },
+    "1734805_ec-670-6_354053_354434": {
+      "annotations.json": "3c7d8260c351bd10",
+      "polygons.coco.json": "4b4c3653fd51b034"
+    },
+    "318610_ec-37-2_1725441_1725570": {
+      "annotations.json": "e8c53aaf2e7dbd11",
+      "polygons.coco.json": "dbfae169da5a2260"
+    },
+    "324195_ec-208-4_711017_711100": {
+      "annotations.json": "50d6b1ad739e59a8",
+      "polygons.coco.json": "8d70c24205e256ca"
+    }
+  },
+  "val": {
+    "1022992_ec-242-0_1021975_1022396": {
+      "annotations.json": "e07ea78d58337d7c",
+      "polygons.coco.json": "2f50e1c97f8413a4"
+    },
+    "1023953_ec-443-1_457666_460304": {
+      "annotations.json": "3b5971f9b75237a7",
+      "polygons.coco.json": "2cb8b93fdb49591a"
+    },
+    "1083899_ec-111-4_1437201_1437454": {
+      "annotations.json": "1269c506eba16ecc",
+      "polygons.coco.json": "e67b8cfe0cf7d7bb"
+    },
+    "1083899_ec-300-0_823607_823860": {
+      "annotations.json": "fa91130737450a2e",
+      "polygons.coco.json": "da2bb07d87f6210c"
+    },
+    "1083899_ec-486-1_429282_429536": {
+      "annotations.json": "b7d13ff593f61887",
+      "polygons.coco.json": "fb4cb00dc444d377"
+    },
+    "1086219_ec-478-4_441956_442102": {
+      "annotations.json": "94b6768f0f436ebc",
+      "polygons.coco.json": "00dd080cba9528bc"
+    },
+    "1086219_ec-515-1_404688_404833": {
+      "annotations.json": "4c79cb4d18777f08",
+      "polygons.coco.json": "117e9c4f61c4cfee"
+    },
+    "1086219_ec-75-3_1884739_1884884": {
+      "annotations.json": "b72988f0210c0140",
+      "polygons.coco.json": "03a40f05c3f39320"
+    },
+    "1138080_ec-400-0_534119_535085": {
+      "annotations.json": "19c618e708012533",
+      "polygons.coco.json": "bad67a82eff4f5b1"
+    },
+    "1173104_ec-395-2_549684_549921": {
+      "annotations.json": "ce5fad2be20276e9",
+      "polygons.coco.json": "4ba367d18c69a8ba"
+    },
+    "1176957_ec-357-4_611606_618705": {
+      "annotations.json": "b75997cc0f7f4f66",
+      "polygons.coco.json": "5c09b971e5593a54"
+    },
+    "1214063_ec-311-3_836531_836942": {
+      "annotations.json": "901c5e9d923bfa3c",
+      "polygons.coco.json": "e44fe55524f19061"
+    },
+    "1664523_ec-138-4_1467441_1467973": {
+      "annotations.json": "a187d5a50c83a4a0",
+      "polygons.coco.json": "1d8d25660f85578e"
+    }
+  },
+  "gt_dataset_root": "/home/rileydaggs/data/segmentation-test-set-new",
+  "gt": {
+    "1022308_ec-100-4_1488412_1489090": {
+      "annotations.json": "22ea0e5fbaa6f18d",
+      "polygons.coco.json": "3a65d36991136581"
+    },
+    "1022308_ec-164-3_1243865_1244543": {
+      "annotations.json": "a5dfe1396b451cf3",
+      "polygons.coco.json": "99f054f35e8fd13c"
+    },
+    "1029713_ec-241-0_1053975_1054375": {
+      "annotations.json": "d0958de61e853de8",
+      "polygons.coco.json": "2a0785d85a1a95b0"
+    },
+    "1045318_ec-201-1_1193662_1194160": {
+      "annotations.json": "48daa58ee02457cb",
+      "polygons.coco.json": "e307af36148fdfda"
+    },
+    "1056185_ec-449-3_452383_453906": {
+      "annotations.json": "2615a210720b73a5",
+      "polygons.coco.json": "4e0bc66d57b168db"
+    },
+    "1065181_ec-430-1_483996_485055": {
+      "annotations.json": "66dc173692be9c3d",
+      "polygons.coco.json": "6e2636899e3293d1"
+    },
+    "1065181_ec-437-2_476575_477634": {
+      "annotations.json": "e96a0bd02948b521",
+      "polygons.coco.json": "f1253eb2e3413044"
+    },
+    "1065181_ec-437-3_476575_477634": {
+      "annotations.json": "ae52fcc3f2699171",
+      "polygons.coco.json": "284fe9a7c99f7a2e"
+    },
+    "1083899_ec-223-1_1147452_1147706": {
+      "annotations.json": "5182611d56a69e98",
+      "polygons.coco.json": "d2307bfe0facee71"
+    },
+    "1090875_ec-340-0_699898_699990": {
+      "annotations.json": "55b2fcbf5aa45a94",
+      "polygons.coco.json": "d137ef6b7701305a"
+    },
+    "1090875_ec-349-3_648246_648337": {
+      "annotations.json": "e420f3fbf1dc17bb",
+      "polygons.coco.json": "56e5e9bd78dc5c1a"
+    },
+    "1099811_ec-434-2_496807_497486": {
+      "annotations.json": "b410a694cf9eb7ae",
+      "polygons.coco.json": "8a5f6d1860937ea8"
+    },
+    "1138080_ec-415-0_521498_522465": {
+      "annotations.json": "9048149f8104cf99",
+      "polygons.coco.json": "11a059297e1edf76"
+    },
+    "1160106_ec-339-4_723141_723325": {
+      "annotations.json": "92f05e6d890c8eae",
+      "polygons.coco.json": "4e21f6043a572e87"
+    },
+    "1160106_ec-353-0_669795_669979": {
+      "annotations.json": "c7f27ac6b66f0c75",
+      "polygons.coco.json": "7ec72ac1b189a93a"
+    },
+    "1179436_ec-258-3_1005013_1005094": {
+      "annotations.json": "d1f03bfeccd38ece",
+      "polygons.coco.json": "731fdfdbbf6bb3eb"
+    },
+    "1217888_ec-214-4_1190735_1190957": {
+      "annotations.json": "b235745ce2984927",
+      "polygons.coco.json": "1e14e6a533a19020"
+    },
+    "1662246_ec-331-6_862450_863051": {
+      "annotations.json": "fe7da4a4e9f93384",
+      "polygons.coco.json": "e284a461a00a12ba"
+    },
+    "1664350_ec-481-7_573433_574094": {
+      "annotations.json": "65c40c7f1e6a072e",
+      "polygons.coco.json": "014d8ca92dab89eb"
+    },
+    "1664523_ec-131-6_1522075_1522607": {
+      "annotations.json": "578797d66f8dc6bd",
+      "polygons.coco.json": "48770a67832d5ee6"
+    },
+    "1664523_ec-137-4_1467502_1468034": {
+      "annotations.json": "6beadc03dbd2c972",
+      "polygons.coco.json": "55b313c27e5a378d"
+    },
+    "1849472_ec-566-2_521498_522604": {
+      "annotations.json": "f528285e93534343",
+      "polygons.coco.json": "78ef069bb68cc41e"
+    },
+    "318935_ec-95-0_1211472_1211508": {
+      "annotations.json": "ea4d7ec01953e245",
+      "polygons.coco.json": "94438ad78f571266"
+    },
+    "324356_ec-325-2_260561_260670": {
+      "annotations.json": "0a55e5bd535c5983",
+      "polygons.coco.json": "20eff3b1d56a6f70"
+    },
+    "328226_ec-95-2_1221265_1221725": {
+      "annotations.json": "aac56b4b13166723",
+      "polygons.coco.json": "20a2ceac4d52c5a3"
+    },
+    "3_279_04042026_ec-279-7_952470_953591": {
+      "annotations.json": "1dc7f6e7a52c43cc",
+      "polygons.coco.json": "02dc0804322611a0"
+    },
+    "921196_ec-164-0_1196724_1196907": {
+      "annotations.json": "97e2d6238ff2563e",
+      "polygons.coco.json": "7def0720bdd4dff4"
+    }
+  },
+  "held_out_cameras": [
+    "ec-100",
+    "ec-111",
+    "ec-131",
+    "ec-137",
+    "ec-138",
+    "ec-164",
+    "ec-201",
+    "ec-214",
+    "ec-223",
+    "ec-241",
+    "ec-242",
+    "ec-258",
+    "ec-279",
+    "ec-300",
+    "ec-311",
+    "ec-325",
+    "ec-331",
+    "ec-339",
+    "ec-340",
+    "ec-349",
+    "ec-353",
+    "ec-357",
+    "ec-395",
+    "ec-400",
+    "ec-415",
+    "ec-430",
+    "ec-434",
+    "ec-437",
+    "ec-443",
+    "ec-449",
+    "ec-478",
+    "ec-481",
+    "ec-486",
+    "ec-515",
+    "ec-566",
+    "ec-75",
+    "ec-95"
+  ],
+  "leaked_cameras": []
+}

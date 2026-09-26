@@ -1,0 +1,816 @@
+train.sh: stdout is /proc/3438961/fd/pipe:[205674241], which does not end in .log —
+          falling back to a generated run name, so ckpts/<run>/run.log
+          will not point at it. Redirect to logs/<something>.log.
+================================================================================
+run_name   20260926_085719Z_hardkeep
+tag        hardkeep
+gpu        6
+config     configs/train_video.yaml
+overrides  train.dropout.p_min=0.1 train.dropout.p_max=0.7
+ckpt_dir   ckpts/20260926_085719Z_hardkeep
+log        logs/20260926_085719Z_hardkeep.log
+git        cae412c
+finalize   yes
+started    2026-09-26T08:57:19Z
+host       lambda-server-1
+================================================================================
+01:57:21 run 20260926_085719Z_hardkeep  tag=hardkeep  git=cae412c
+01:57:21 config configs/train_video.yaml -> /home/rileydaggs/projects/video-ft/ckpts/20260926_085719Z_hardkeep/config_resolved.yaml
+01:57:21 splits: train 157 incidents / 104 cameras, val 13, test 28
+01:57:21 config_all --check: clean (11 divergences still true)
+01:57:21 building clips ...
+01:57:21   324195_ec-208-4_711017_711100                  poly=   0 capped=  0 boxed=  0 masklets= 0 stride= 0 clips=  0  no polygons
+01:57:21 train: 2204 clips over 156 incidents | val: 223 clips
+01:57:21 clip signature 06400a83716793ff
+01:57:22 run directory complete: /home/rileydaggs/projects/video-ft/ckpts/20260926_085719Z_hardkeep
+01:57:22   clip_manifest.jsonl
+01:57:22   config_resolved.yaml
+01:57:22   prompt_schedule.jsonl
+01:57:22   provenance.json
+01:57:22   repro.sh
+01:57:22   run.log
+01:57:22   splits_resolved.yaml
+01:57:22   train.log
+01:57:22 building tracker ...
+/home/rileydaggs/projects/video-ft/sam3/sam3/model_builder.py:8: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+/home/rileydaggs/projects/video-ft/.venv/lib/python3.12/site-packages/timm/models/layers/__init__.py:49: FutureWarning: Importing from timm.models.layers is deprecated, please import via timm.layers
+  warnings.warn(f"Importing from {__name__} is deprecated, please import via timm.layers", FutureWarning)
+01:57:44 base weights: 1068 tensors from sam3.pt (295 unexpected)
+01:57:45 init_from best.pt  {'run_name': 'all_train_20260921_204343Z_L4E-2', 'epoch': 12}
+01:57:45 tracker prepared: num_maskmem=7 max_cond=2 keep_first=True dropout=0.00 (16 modules, 8 attn) grad_ckpt=False
+01:57:45   trainable mask_downsample.    2 tensors    0.0000M
+01:57:45   trainable maskmem_backbone.   40 tensors    1.3846M
+01:57:45   trainable obj_ptr_proj.    6 tensors    0.1974M
+01:57:45   trainable obj_ptr_tpos_proj.    2 tensors    0.0164M
+01:57:45   trainable tokens          5 tensors    0.0013M
+01:57:45   trainable transformer.  106 tensors    5.9223M
+01:57:45   trainable TOTAL         161 tensors    7.5220M
+01:57:45 excluded from the optimizer (no reachable gradient): mask_downsample.weight, mask_downsample.bias
+01:57:45 optimizer: memory=159t@1.00e-04
+01:57:45 epoch 0: zero-shot val pass
+01:57:48   memory bank composition (batch 0):
+01:57:48       t   cond  prompted |    n_cond  n_recent |  attended
+01:57:48       0   True      True |         1         0 |         1
+01:57:48       1  False     False |         1         1 |         2
+01:57:48       2  False      True |         1         2 |         2
+01:57:48       3  False     False |         1         3 |         3
+01:57:48       4  False     False |         1         4 |         4
+01:57:48       5  False     False |         1         5 |         5
+01:57:48       6  False     False |         1         6 |         6
+01:57:48       7  False     False |         1         6 |         7
+01:57:48   val   e0 [   0/223] loss 0.2110 iou 0.5996 p=0.70
+01:58:20   val   e0 [  50/223] loss 0.4177 iou 0.5969 p=0.70
+01:58:55   val   e0 [ 100/223] loss 0.3297 iou 0.5757 p=0.70
+01:59:30   val   e0 [ 150/223] loss 0.0388 iou 0.9473 p=0.70
+02:00:04   val   e0 [ 200/223] loss 0.3457 iou 0.5549 p=0.70
+02:00:20   val e0  loss 0.2945 iou_fused 0.6467 (best-of-3 0.7179)  boxed 0.59  by_t [0.692, 0.643, 0.643, 0.637, 0.645, 0.646, 0.644, 0.623]  by_kind {'cond': 0.692, 'prompted': 0.583, 'dropout': 0.711}
+02:00:22   memory bank composition (batch 0):
+02:00:22       t   cond  prompted |    n_cond  n_recent |  attended
+02:00:22       0   True      True |         1         0 |         1
+02:00:22       1  False     False |         1         1 |         2
+02:00:22       2  False      True |         1         2 |         3
+02:00:22       3  False     False |         1         3 |         4
+02:00:22       4  False     False |         1         4 |         5
+02:00:22       5  False     False |         1         5 |         6
+02:00:22       6  False     False |         1         6 |         7
+/home/rileydaggs/projects/video-ft/smokeftv/engine.py:233: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:836.)
+  float(loss), sum(stats["iou_by_t"]) / len(stats["iou_by_t"]), p)
+02:00:22   train e1 [   0/2204] loss 0.3059 iou 0.7070 p=0.27
+02:01:03   train e1 [  50/2204] loss 0.3314 iou 0.7088 p=0.37
+02:01:44   train e1 [ 100/2204] loss 0.2787 iou 0.5068 p=0.10
+02:02:26   train e1 [ 150/2204] loss 0.2718 iou 0.5312 p=0.50
+02:03:07   train e1 [ 200/2204] loss 0.0871 iou 0.8530 p=0.11
+02:03:49   train e1 [ 250/2204] loss 0.6524 iou 0.3516 p=0.69
+02:04:30   train e1 [ 300/2204] loss 0.3157 iou 0.4525 p=0.68
+02:05:12   train e1 [ 350/2204] loss 0.3012 iou 0.6098 p=0.59
+02:05:53   train e1 [ 400/2204] loss 0.5093 iou 0.2366 p=0.49
+02:06:35   train e1 [ 450/2204] loss 0.7901 iou 0.2901 p=0.63
+02:07:16   train e1 [ 500/2204] loss 0.2434 iou 0.5525 p=0.17
+02:07:58   train e1 [ 550/2204] loss 0.3004 iou 0.5825 p=0.33
+02:08:39   train e1 [ 600/2204] loss 0.3107 iou 0.5560 p=0.47
+02:09:21   train e1 [ 650/2204] loss 0.1002 iou 0.8492 p=0.36
+02:10:03   train e1 [ 700/2204] loss 0.4627 iou 0.4558 p=0.62
+02:10:45   train e1 [ 750/2204] loss 0.2742 iou 0.5483 p=0.57
+02:11:26   train e1 [ 800/2204] loss 0.3727 iou 0.6632 p=0.31
+02:12:08   train e1 [ 850/2204] loss 0.4228 iou 0.4333 p=0.35
+02:12:49   train e1 [ 900/2204] loss 0.7067 iou 0.0926 p=0.37
+02:13:31   train e1 [ 950/2204] loss 0.4208 iou 0.4592 p=0.18
+02:14:13   train e1 [1000/2204] loss 0.1305 iou 0.6844 p=0.63
+02:14:54   train e1 [1050/2204] loss 0.2130 iou 0.6637 p=0.31
+02:15:36   train e1 [1100/2204] loss 0.6189 iou 0.3391 p=0.30
+02:16:18   train e1 [1150/2204] loss 0.4327 iou 0.3636 p=0.30
+02:16:59   train e1 [1200/2204] loss 0.4403 iou 0.3673 p=0.37
+02:17:41   train e1 [1250/2204] loss 0.3739 iou 0.4368 p=0.36
+02:18:22   train e1 [1300/2204] loss 0.2994 iou 0.5557 p=0.66
+02:19:04   train e1 [1350/2204] loss 0.4132 iou 0.4155 p=0.16
+02:19:46   train e1 [1400/2204] loss 0.1583 iou 0.7717 p=0.52
+02:20:27   train e1 [1450/2204] loss 0.4260 iou 0.6539 p=0.68
+02:21:09   train e1 [1500/2204] loss 0.0823 iou 0.8449 p=0.51
+02:21:50   train e1 [1550/2204] loss 0.1132 iou 0.8442 p=0.53
+02:22:32   train e1 [1600/2204] loss 0.5311 iou 0.3442 p=0.64
+02:23:14   train e1 [1650/2204] loss 0.0886 iou 0.8534 p=0.43
+02:23:55   train e1 [1700/2204] loss 0.3908 iou 0.5135 p=0.49
+02:24:37   train e1 [1750/2204] loss 0.0959 iou 0.8324 p=0.60
+02:25:19   train e1 [1800/2204] loss 0.2955 iou 0.6412 p=0.66
+02:26:00   train e1 [1850/2204] loss 0.1962 iou 0.6955 p=0.52
+02:26:42   train e1 [1900/2204] loss 0.1723 iou 0.6305 p=0.10
+02:27:24   train e1 [1950/2204] loss 0.1814 iou 0.7626 p=0.21
+02:28:05   train e1 [2000/2204] loss 0.1044 iou 0.8269 p=0.52
+02:28:47   train e1 [2050/2204] loss 0.3925 iou 0.3830 p=0.58
+02:29:28   train e1 [2100/2204] loss 0.4563 iou 0.3917 p=0.29
+02:30:10   train e1 [2150/2204] loss 0.1945 iou 0.6983 p=0.64
+02:30:51   train e1 [2200/2204] loss 0.2491 iou 0.6223 p=0.22
+02:30:54 train e1  loss 0.3129 iou_fused 0.5785  1834s  zero-grad frames 39
+02:30:55   val   e1 [   0/223] loss 0.1827 iou 0.6144 p=0.46
+02:31:31   val   e1 [  50/223] loss 0.2809 iou 0.6409 p=0.26
+02:32:06   val   e1 [ 100/223] loss 0.2833 iou 0.6664 p=0.19
+02:32:43   val   e1 [ 150/223] loss 0.0419 iou 0.9486 p=0.21
+02:33:19   val   e1 [ 200/223] loss 0.3254 iou 0.6164 p=0.31
+02:33:35   val e1  loss 0.2432 iou_fused 0.6720 (best-of-3 0.7441)  boxed 0.54  by_t [0.689, 0.673, 0.676, 0.678, 0.689, 0.683, 0.659, 0.63]  by_kind {'cond': 0.689, 'prompted': 0.625, 'dropout': 0.722}
+02:33:36   new best iou_fused 0.6720 -> best.pt
+02:33:38   train e2 [   0/2204] loss 0.3525 iou 0.3848 p=0.12
+02:34:23   train e2 [  50/2204] loss 0.4259 iou 0.3813 p=0.26
+02:35:07   train e2 [ 100/2204] loss 0.2536 iou 0.5682 p=0.50
+02:35:51   train e2 [ 150/2204] loss 0.2201 iou 0.7360 p=0.48
+02:36:36   train e2 [ 200/2204] loss 0.3337 iou 0.4293 p=0.19
+02:37:20   train e2 [ 250/2204] loss 0.3118 iou 0.4658 p=0.14
+02:38:05   train e2 [ 300/2204] loss 0.1266 iou 0.7877 p=0.51
+02:38:49   train e2 [ 350/2204] loss 0.3927 iou 0.4139 p=0.26
+02:39:33   train e2 [ 400/2204] loss 0.3114 iou 0.6003 p=0.20
+02:40:18   train e2 [ 450/2204] loss 0.1705 iou 0.7730 p=0.63
+02:41:02   train e2 [ 500/2204] loss 0.1420 iou 0.8721 p=0.60
+02:41:46   train e2 [ 550/2204] loss 0.5132 iou 0.4020 p=0.57
+02:42:31   train e2 [ 600/2204] loss 0.1816 iou 0.6325 p=0.63
+02:43:15   train e2 [ 650/2204] loss 0.0827 iou 0.8799 p=0.22
+02:43:59   train e2 [ 700/2204] loss 0.4221 iou 0.5218 p=0.63
+02:44:44   train e2 [ 750/2204] loss 0.1955 iou 0.6288 p=0.19
+02:45:28   train e2 [ 800/2204] loss 0.1741 iou 0.7470 p=0.66
+02:46:12   train e2 [ 850/2204] loss 0.1273 iou 0.7595 p=0.43
+02:46:57   train e2 [ 900/2204] loss 0.1192 iou 0.7688 p=0.33
+02:47:41   train e2 [ 950/2204] loss 0.2524 iou 0.6567 p=0.37
+02:48:26   train e2 [1000/2204] loss 0.6430 iou 0.2071 p=0.46
+02:49:10   train e2 [1050/2204] loss 0.4066 iou 0.5179 p=0.58
+02:49:54   train e2 [1100/2204] loss 0.5969 iou 0.4000 p=0.63
+02:50:38   train e2 [1150/2204] loss 0.6571 iou 0.1752 p=0.26
+02:51:23   train e2 [1200/2204] loss 0.2764 iou 0.5517 p=0.47
+02:52:07   train e2 [1250/2204] loss 0.1721 iou 0.7069 p=0.65
+02:52:51   train e2 [1300/2204] loss 0.2739 iou 0.5635 p=0.25
+02:53:35   train e2 [1350/2204] loss 0.2511 iou 0.6641 p=0.11
+02:54:19   train e2 [1400/2204] loss 0.2880 iou 0.5606 p=0.21
+02:55:04   train e2 [1450/2204] loss 0.2776 iou 0.5616 p=0.14
+02:55:48   train e2 [1500/2204] loss 0.2875 iou 0.5483 p=0.25
+02:56:32   train e2 [1550/2204] loss 0.2305 iou 0.5999 p=0.14
+02:57:17   train e2 [1600/2204] loss 0.3882 iou 0.5609 p=0.35
+02:58:01   train e2 [1650/2204] loss 0.2271 iou 0.6737 p=0.46
+02:58:45   train e2 [1700/2204] loss 0.3126 iou 0.5068 p=0.19
+02:59:28   train e2 [1750/2204] loss 0.1459 iou 0.7587 p=0.66
+03:00:12   train e2 [1800/2204] loss 0.2027 iou 0.6959 p=0.17
+03:00:55   train e2 [1850/2204] loss 0.1984 iou 0.7305 p=0.32
+03:01:38   train e2 [1900/2204] loss 0.2054 iou 0.6009 p=0.58
+03:02:21   train e2 [1950/2204] loss 0.4096 iou 0.5008 p=0.43
+03:03:04   train e2 [2000/2204] loss 0.1469 iou 0.8436 p=0.47
+03:03:47   train e2 [2050/2204] loss 0.2115 iou 0.6164 p=0.37
+03:04:30   train e2 [2100/2204] loss 0.2827 iou 0.5941 p=0.36
+03:05:13   train e2 [2150/2204] loss 0.2011 iou 0.6437 p=0.54
+03:05:57   train e2 [2200/2204] loss 0.0596 iou 0.8601 p=0.56
+03:05:59 train e2  loss 0.2650 iou_fused 0.6186  1943s  zero-grad frames 15
+03:06:01   val   e2 [   0/223] loss 0.1593 iou 0.6640 p=0.63
+03:06:39   val   e2 [  50/223] loss 0.2740 iou 0.6439 p=0.67
+03:07:15   val   e2 [ 100/223] loss 0.2771 iou 0.5708 p=0.39
+03:07:52   val   e2 [ 150/223] loss 0.0398 iou 0.9447 p=0.15
+03:08:28   val   e2 [ 200/223] loss 0.2778 iou 0.6609 p=0.17
+03:08:44   val e2  loss 0.2265 iou_fused 0.6795 (best-of-3 0.7566)  boxed 0.52  by_t [0.686, 0.679, 0.677, 0.687, 0.686, 0.682, 0.679, 0.661]  by_kind {'cond': 0.686, 'prompted': 0.646, 'dropout': 0.718}
+03:08:45   new best iou_fused 0.6795 -> best.pt
+03:08:47   train e3 [   0/2204] loss 0.1547 iou 0.7391 p=0.66
+03:09:30   train e3 [  50/2204] loss 0.1051 iou 0.8435 p=0.42
+03:10:14   train e3 [ 100/2204] loss 0.2866 iou 0.5687 p=0.68
+03:10:57   train e3 [ 150/2204] loss 0.1332 iou 0.8668 p=0.11
+03:11:41   train e3 [ 200/2204] loss 0.1864 iou 0.6177 p=0.30
+03:12:24   train e3 [ 250/2204] loss 0.1622 iou 0.7635 p=0.60
+03:13:07   train e3 [ 300/2204] loss 0.3976 iou 0.6816 p=0.38
+03:13:51   train e3 [ 350/2204] loss 0.2738 iou 0.6206 p=0.51
+03:14:34   train e3 [ 400/2204] loss 0.2259 iou 0.6373 p=0.30
+03:15:17   train e3 [ 450/2204] loss 0.3336 iou 0.5442 p=0.58
+03:16:01   train e3 [ 500/2204] loss 0.2062 iou 0.6240 p=0.50
+03:16:44   train e3 [ 550/2204] loss 0.3329 iou 0.4892 p=0.63
+03:17:27   train e3 [ 600/2204] loss 0.2634 iou 0.7575 p=0.29
+03:18:09   train e3 [ 650/2204] loss 0.2205 iou 0.6512 p=0.67
+03:18:53   train e3 [ 700/2204] loss 0.1856 iou 0.6181 p=0.21
+03:19:36   train e3 [ 750/2204] loss 0.2543 iou 0.6230 p=0.67
+03:20:19   train e3 [ 800/2204] loss 0.2497 iou 0.5982 p=0.49
+03:21:02   train e3 [ 850/2204] loss 0.3361 iou 0.5588 p=0.36
+03:21:46   train e3 [ 900/2204] loss 0.1031 iou 0.8338 p=0.58
+03:22:29   train e3 [ 950/2204] loss 0.2332 iou 0.5837 p=0.23
+03:23:12   train e3 [1000/2204] loss 0.1848 iou 0.6739 p=0.44
+03:23:55   train e3 [1050/2204] loss 0.2137 iou 0.6490 p=0.20
+03:24:38   train e3 [1100/2204] loss 0.2499 iou 0.6398 p=0.63
+03:25:21   train e3 [1150/2204] loss 0.2933 iou 0.6027 p=0.40
+03:26:04   train e3 [1200/2204] loss 0.0955 iou 0.8351 p=0.15
+03:26:47   train e3 [1250/2204] loss 0.1694 iou 0.6309 p=0.48
+03:27:31   train e3 [1300/2204] loss 0.2089 iou 0.6163 p=0.20
+03:28:14   train e3 [1350/2204] loss 0.4256 iou 0.3710 p=0.36
+03:28:57   train e3 [1400/2204] loss 0.2087 iou 0.8019 p=0.63
+03:29:40   train e3 [1450/2204] loss 0.4477 iou 0.4980 p=0.34
+03:30:24   train e3 [1500/2204] loss 0.2384 iou 0.6050 p=0.50
+03:31:07   train e3 [1550/2204] loss 0.2916 iou 0.6100 p=0.21
+03:31:50   train e3 [1600/2204] loss 0.2608 iou 0.6298 p=0.18
+03:32:34   train e3 [1650/2204] loss 0.2601 iou 0.6828 p=0.17
+03:33:17   train e3 [1700/2204] loss 0.3823 iou 0.4104 p=0.67
+03:34:01   train e3 [1750/2204] loss 0.1300 iou 0.7689 p=0.54
+03:34:44   train e3 [1800/2204] loss 0.2376 iou 0.5615 p=0.10
+03:35:27   train e3 [1850/2204] loss 0.2488 iou 0.6428 p=0.47
+03:36:11   train e3 [1900/2204] loss 0.2907 iou 0.7283 p=0.60
+03:36:54   train e3 [1950/2204] loss 0.1935 iou 0.5818 p=0.27
+03:37:38   train e3 [2000/2204] loss 0.5015 iou 0.3152 p=0.11
+03:38:21   train e3 [2050/2204] loss 0.2622 iou 0.6103 p=0.29
+03:39:04   train e3 [2100/2204] loss 0.3864 iou 0.5581 p=0.70
+03:39:48   train e3 [2150/2204] loss 0.2104 iou 0.6888 p=0.31
+03:40:31   train e3 [2200/2204] loss 0.0850 iou 0.8295 p=0.35
+03:40:34 train e3  loss 0.2386 iou_fused 0.6408  1908s  zero-grad frames 12
+03:40:35   val   e3 [   0/223] loss 0.1680 iou 0.6525 p=0.60
+03:41:13   val   e3 [  50/223] loss 0.2726 iou 0.6257 p=0.68
+03:41:49   val   e3 [ 100/223] loss 0.2782 iou 0.5589 p=0.51
+03:42:26   val   e3 [ 150/223] loss 0.0418 iou 0.9416 p=0.31
+03:43:02   val   e3 [ 200/223] loss 0.2881 iou 0.6550 p=0.39
+03:43:18   val e3  loss 0.2364 iou_fused 0.6775 (best-of-3 0.7493)  boxed 0.51  by_t [0.684, 0.676, 0.676, 0.678, 0.686, 0.686, 0.676, 0.657]  by_kind {'cond': 0.684, 'prompted': 0.65, 'dropout': 0.705}
+03:43:20   train e4 [   0/2204] loss 0.1388 iou 0.7247 p=0.51
+03:44:03   train e4 [  50/2204] loss 0.1679 iou 0.6982 p=0.14
+03:44:47   train e4 [ 100/2204] loss 0.2532 iou 0.5614 p=0.39
+03:45:30   train e4 [ 150/2204] loss 0.2668 iou 0.5992 p=0.28
+03:46:14   train e4 [ 200/2204] loss 0.3102 iou 0.5585 p=0.58
+03:46:56   train e4 [ 250/2204] loss 0.1507 iou 0.7082 p=0.25
+03:47:40   train e4 [ 300/2204] loss 0.2074 iou 0.6271 p=0.68
+03:48:23   train e4 [ 350/2204] loss 0.2647 iou 0.5816 p=0.20
+03:49:06   train e4 [ 400/2204] loss 0.0727 iou 0.8950 p=0.59
+03:49:49   train e4 [ 450/2204] loss 0.1331 iou 0.8322 p=0.64
+03:50:32   train e4 [ 500/2204] loss 0.2142 iou 0.6720 p=0.14
+03:51:15   train e4 [ 550/2204] loss 0.1833 iou 0.6905 p=0.41
+03:51:58   train e4 [ 600/2204] loss 0.1579 iou 0.7453 p=0.41
+03:52:41   train e4 [ 650/2204] loss 0.1758 iou 0.7421 p=0.46
+03:53:25   train e4 [ 700/2204] loss 0.3040 iou 0.3965 p=0.28
+03:54:08   train e4 [ 750/2204] loss 0.1353 iou 0.8123 p=0.38
+03:54:51   train e4 [ 800/2204] loss 0.1621 iou 0.7170 p=0.62
+03:55:34   train e4 [ 850/2204] loss 0.1899 iou 0.7064 p=0.51
+03:56:17   train e4 [ 900/2204] loss 0.1888 iou 0.6879 p=0.17
+03:57:01   train e4 [ 950/2204] loss 0.0632 iou 0.8454 p=0.39
+03:57:44   train e4 [1000/2204] loss 0.3189 iou 0.4867 p=0.46
+03:58:28   train e4 [1050/2204] loss 0.0596 iou 0.9375 p=0.11
+03:59:11   train e4 [1100/2204] loss 0.5250 iou 0.4312 p=0.61
+03:59:54   train e4 [1150/2204] loss 0.4634 iou 0.3978 p=0.46
+04:00:37   train e4 [1200/2204] loss 0.0724 iou 0.8950 p=0.54
+04:01:21   train e4 [1250/2204] loss 0.2798 iou 0.5404 p=0.67
+04:02:04   train e4 [1300/2204] loss 0.3966 iou 0.5129 p=0.33
+04:02:48   train e4 [1350/2204] loss 0.3376 iou 0.4512 p=0.35
+04:03:31   train e4 [1400/2204] loss 0.2101 iou 0.9113 p=0.61
+04:04:15   train e4 [1450/2204] loss 0.2356 iou 0.6862 p=0.11
+04:04:58   train e4 [1500/2204] loss 0.1120 iou 0.8183 p=0.13
+04:05:41   train e4 [1550/2204] loss 0.1866 iou 0.6629 p=0.24
+04:06:24   train e4 [1600/2204] loss 0.1667 iou 0.6683 p=0.57
+04:07:08   train e4 [1650/2204] loss 0.2725 iou 0.5231 p=0.39
+04:07:51   train e4 [1700/2204] loss 0.1375 iou 0.8586 p=0.30
+04:08:33   train e4 [1750/2204] loss 0.1870 iou 0.7275 p=0.37
+04:09:16   train e4 [1800/2204] loss 0.0865 iou 0.8597 p=0.38
+04:09:58   train e4 [1850/2204] loss 0.1279 iou 0.8072 p=0.66
+04:10:41   train e4 [1900/2204] loss 0.2676 iou 0.5671 p=0.27
+04:11:24   train e4 [1950/2204] loss 0.2026 iou 0.6228 p=0.32
+04:12:08   train e4 [2000/2204] loss 0.1461 iou 0.7045 p=0.47
+04:12:51   train e4 [2050/2204] loss 0.2286 iou 0.6171 p=0.33
+04:13:34   train e4 [2100/2204] loss 0.1387 iou 0.7165 p=0.21
+04:14:17   train e4 [2150/2204] loss 0.2508 iou 0.5863 p=0.68
+04:15:00   train e4 [2200/2204] loss 0.1137 iou 0.7994 p=0.21
+04:15:02 train e4  loss 0.2173 iou_fused 0.6614  1904s  zero-grad frames 9
+04:15:04   val   e4 [   0/223] loss 0.1644 iou 0.6089 p=0.57
+04:15:41   val   e4 [  50/223] loss 0.3114 iou 0.6336 p=0.58
+04:16:18   val   e4 [ 100/223] loss 0.2458 iou 0.5965 p=0.38
+04:16:55   val   e4 [ 150/223] loss 0.0372 iou 0.9474 p=0.28
+04:17:30   val   e4 [ 200/223] loss 0.2910 iou 0.6485 p=0.19
+04:17:47   val e4  loss 0.2370 iou_fused 0.6785 (best-of-3 0.7523)  boxed 0.52  by_t [0.683, 0.679, 0.682, 0.678, 0.684, 0.685, 0.679, 0.657]  by_kind {'cond': 0.683, 'prompted': 0.638, 'dropout': 0.719}
+04:17:48   train e5 [   0/2204] loss 0.2036 iou 0.6999 p=0.22
+04:18:31   train e5 [  50/2204] loss 0.1631 iou 0.7860 p=0.69
+04:19:14   train e5 [ 100/2204] loss 0.3209 iou 0.5292 p=0.54
+04:19:57   train e5 [ 150/2204] loss 0.3368 iou 0.6533 p=0.16
+04:20:40   train e5 [ 200/2204] loss 0.2980 iou 0.5301 p=0.50
+04:21:23   train e5 [ 250/2204] loss 0.1241 iou 0.7428 p=0.54
+04:22:06   train e5 [ 300/2204] loss 0.3223 iou 0.7197 p=0.23
+04:22:49   train e5 [ 350/2204] loss 0.2175 iou 0.6623 p=0.30
+04:23:32   train e5 [ 400/2204] loss 0.0950 iou 0.7604 p=0.44
+04:24:15   train e5 [ 450/2204] loss 0.2853 iou 0.5412 p=0.19
+04:24:59   train e5 [ 500/2204] loss 0.1757 iou 0.6938 p=0.66
+04:25:43   train e5 [ 550/2204] loss 0.2289 iou 0.6347 p=0.14
+04:26:26   train e5 [ 600/2204] loss 0.1206 iou 0.8060 p=0.45
+04:27:08   train e5 [ 650/2204] loss 0.2726 iou 0.5715 p=0.49
+04:27:50   train e5 [ 700/2204] loss 0.3634 iou 0.4634 p=0.34
+04:28:33   train e5 [ 750/2204] loss 0.1391 iou 0.7369 p=0.48
+04:29:18   train e5 [ 800/2204] loss 0.0576 iou 0.9253 p=0.66
+04:30:02   train e5 [ 850/2204] loss 0.4160 iou 0.5245 p=0.55
+04:30:46   train e5 [ 900/2204] loss 0.3232 iou 0.4765 p=0.11
+04:31:30   train e5 [ 950/2204] loss 0.2154 iou 0.6249 p=0.22
+04:32:13   train e5 [1000/2204] loss 0.1050 iou 0.7401 p=0.70
+04:32:57   train e5 [1050/2204] loss 0.1409 iou 0.7518 p=0.10
+04:33:40   train e5 [1100/2204] loss 0.2108 iou 0.6275 p=0.50
+04:34:22   train e5 [1150/2204] loss 0.1496 iou 0.7724 p=0.32
+04:35:05   train e5 [1200/2204] loss 0.1720 iou 0.6787 p=0.68
+04:35:48   train e5 [1250/2204] loss 0.1234 iou 0.8953 p=0.35
+04:36:31   train e5 [1300/2204] loss 0.2293 iou 0.6261 p=0.14
+04:37:15   train e5 [1350/2204] loss 0.0917 iou 0.8346 p=0.19
+04:37:58   train e5 [1400/2204] loss 0.1613 iou 0.6868 p=0.25
+04:38:41   train e5 [1450/2204] loss 0.1208 iou 0.8342 p=0.70
+04:39:24   train e5 [1500/2204] loss 0.3702 iou 0.4568 p=0.21
+04:40:07   train e5 [1550/2204] loss 0.1338 iou 0.8127 p=0.69
+04:40:50   train e5 [1600/2204] loss 0.1839 iou 0.6815 p=0.47
+04:41:33   train e5 [1650/2204] loss 0.2709 iou 0.5192 p=0.36
+04:42:16   train e5 [1700/2204] loss 0.1603 iou 0.7032 p=0.32
+04:42:58   train e5 [1750/2204] loss 0.2597 iou 0.6050 p=0.11
+04:43:41   train e5 [1800/2204] loss 0.1443 iou 0.7351 p=0.43
+04:44:24   train e5 [1850/2204] loss 0.2117 iou 0.6244 p=0.42
+04:45:08   train e5 [1900/2204] loss 0.3356 iou 0.4079 p=0.11
+04:45:51   train e5 [1950/2204] loss 0.1339 iou 0.7799 p=0.66
+04:46:34   train e5 [2000/2204] loss 0.0963 iou 0.7965 p=0.57
+04:47:18   train e5 [2050/2204] loss 0.2074 iou 0.6158 p=0.35
+04:48:01   train e5 [2100/2204] loss 0.2102 iou 0.6600 p=0.62
+04:48:44   train e5 [2150/2204] loss 0.1792 iou 0.6794 p=0.24
+04:49:27   train e5 [2200/2204] loss 0.3080 iou 0.5669 p=0.63
+04:49:30 train e5  loss 0.1978 iou_fused 0.6821  1903s  zero-grad frames 11
+04:49:31   val   e5 [   0/223] loss 0.1547 iou 0.6499 p=0.37
+04:50:09   val   e5 [  50/223] loss 0.2893 iou 0.6335 p=0.57
+04:50:46   val   e5 [ 100/223] loss 0.2875 iou 0.5456 p=0.36
+04:51:23   val   e5 [ 150/223] loss 0.0383 iou 0.9440 p=0.22
+04:51:58   val   e5 [ 200/223] loss 0.3042 iou 0.6437 p=0.51
+04:52:15   val e5  loss 0.2562 iou_fused 0.6627 (best-of-3 0.7429)  boxed 0.55  by_t [0.682, 0.673, 0.675, 0.671, 0.666, 0.661, 0.646, 0.628]  by_kind {'cond': 0.682, 'prompted': 0.616, 'dropout': 0.718}
+04:52:17   train e6 [   0/2204] loss 0.2404 iou 0.6576 p=0.66
+04:53:00   train e6 [  50/2204] loss 0.2102 iou 0.6712 p=0.64
+04:53:43   train e6 [ 100/2204] loss 0.1382 iou 0.7818 p=0.45
+04:54:26   train e6 [ 150/2204] loss 0.1230 iou 0.7785 p=0.45
+04:55:09   train e6 [ 200/2204] loss 0.1481 iou 0.7599 p=0.56
+04:55:52   train e6 [ 250/2204] loss 0.1143 iou 0.8158 p=0.37
+04:56:35   train e6 [ 300/2204] loss 0.2549 iou 0.6569 p=0.67
+04:57:18   train e6 [ 350/2204] loss 0.2783 iou 0.5180 p=0.29
+04:58:02   train e6 [ 400/2204] loss 0.1604 iou 0.7204 p=0.27
+04:58:45   train e6 [ 450/2204] loss 0.1522 iou 0.7224 p=0.46
+04:59:28   train e6 [ 500/2204] loss 0.1712 iou 0.7563 p=0.66
+05:00:11   train e6 [ 550/2204] loss 0.2243 iou 0.6236 p=0.37
+05:00:54   train e6 [ 600/2204] loss 0.1478 iou 0.8330 p=0.55
+05:01:37   train e6 [ 650/2204] loss 0.0656 iou 0.8847 p=0.39
+05:02:21   train e6 [ 700/2204] loss 0.2472 iou 0.5131 p=0.49
+05:03:04   train e6 [ 750/2204] loss 0.1333 iou 0.7843 p=0.17
+05:03:47   train e6 [ 800/2204] loss 0.1630 iou 0.7398 p=0.11
+05:04:30   train e6 [ 850/2204] loss 0.1694 iou 0.6930 p=0.14
+05:05:13   train e6 [ 900/2204] loss 0.1214 iou 0.7797 p=0.11
+05:05:56   train e6 [ 950/2204] loss 0.0631 iou 0.9104 p=0.14
+05:06:40   train e6 [1000/2204] loss 0.0544 iou 0.9043 p=0.53
+05:07:23   train e6 [1050/2204] loss 0.1600 iou 0.6930 p=0.20
+05:08:06   train e6 [1100/2204] loss 0.1224 iou 0.8707 p=0.30
+05:08:50   train e6 [1150/2204] loss 0.1156 iou 0.7548 p=0.15
+05:09:33   train e6 [1200/2204] loss 0.2725 iou 0.5516 p=0.35
+05:10:16   train e6 [1250/2204] loss 0.1407 iou 0.7212 p=0.43
+05:10:59   train e6 [1300/2204] loss 0.1884 iou 0.6763 p=0.68
+05:11:42   train e6 [1350/2204] loss 0.3079 iou 0.5544 p=0.58
+05:12:25   train e6 [1400/2204] loss 0.0640 iou 0.8738 p=0.26
+05:13:08   train e6 [1450/2204] loss 0.1981 iou 0.6570 p=0.62
+05:13:51   train e6 [1500/2204] loss 0.1467 iou 0.7332 p=0.19
+05:14:34   train e6 [1550/2204] loss 0.2693 iou 0.5232 p=0.36
+05:15:17   train e6 [1600/2204] loss 0.1792 iou 0.6925 p=0.62
+05:15:59   train e6 [1650/2204] loss 0.2252 iou 0.6190 p=0.34
+05:16:43   train e6 [1700/2204] loss 0.1309 iou 0.7298 p=0.43
+05:17:27   train e6 [1750/2204] loss 0.1921 iou 0.7937 p=0.67
+05:18:12   train e6 [1800/2204] loss 0.1682 iou 0.7300 p=0.12
+05:18:57   train e6 [1850/2204] loss 0.1476 iou 0.7495 p=0.54
+05:19:41   train e6 [1900/2204] loss 0.2512 iou 0.5493 p=0.57
+05:20:26   train e6 [1950/2204] loss 0.2849 iou 0.6467 p=0.41
+05:21:10   train e6 [2000/2204] loss 0.0768 iou 0.8354 p=0.56
+05:21:54   train e6 [2050/2204] loss 0.0395 iou 0.9349 p=0.46
+05:22:38   train e6 [2100/2204] loss 0.1809 iou 0.7155 p=0.45
+05:23:22   train e6 [2150/2204] loss 0.1972 iou 0.6647 p=0.61
+05:24:06   train e6 [2200/2204] loss 0.2636 iou 0.5683 p=0.28
+05:24:09 train e6  loss 0.1814 iou_fused 0.6993  1914s  zero-grad frames 18
+05:24:11   val   e6 [   0/223] loss 0.1618 iou 0.6442 p=0.25
+05:24:49   val   e6 [  50/223] loss 0.3232 iou 0.6335 p=0.63
+05:25:25   val   e6 [ 100/223] loss 0.2977 iou 0.5847 p=0.28
+05:26:02   val   e6 [ 150/223] loss 0.0399 iou 0.9429 p=0.43
+05:26:38   val   e6 [ 200/223] loss 0.2870 iou 0.6445 p=0.60
+05:26:55   val e6  loss 0.2533 iou_fused 0.6624 (best-of-3 0.7428)  boxed 0.57  by_t [0.682, 0.666, 0.668, 0.669, 0.668, 0.668, 0.647, 0.631]  by_kind {'cond': 0.682, 'prompted': 0.616, 'dropout': 0.722}
+05:26:57   train e7 [   0/2204] loss 0.0511 iou 0.9140 p=0.45
+05:27:40   train e7 [  50/2204] loss 0.0833 iou 0.8683 p=0.59
+05:28:23   train e7 [ 100/2204] loss 0.1496 iou 0.7487 p=0.25
+05:29:07   train e7 [ 150/2204] loss 0.3578 iou 0.5115 p=0.45
+05:29:50   train e7 [ 200/2204] loss 0.2257 iou 0.5583 p=0.64
+05:30:32   train e7 [ 250/2204] loss 0.2693 iou 0.5709 p=0.29
+05:31:16   train e7 [ 300/2204] loss 0.1473 iou 0.7609 p=0.47
+05:31:59   train e7 [ 350/2204] loss 0.2194 iou 0.6775 p=0.18
+05:32:42   train e7 [ 400/2204] loss 0.3155 iou 0.5020 p=0.55
+05:33:25   train e7 [ 450/2204] loss 0.1206 iou 0.7760 p=0.19
+05:34:08   train e7 [ 500/2204] loss 0.1379 iou 0.7877 p=0.28
+05:34:52   train e7 [ 550/2204] loss 0.1532 iou 0.7164 p=0.56
+05:35:35   train e7 [ 600/2204] loss 0.1584 iou 0.6942 p=0.34
+05:36:19   train e7 [ 650/2204] loss 0.2630 iou 0.6003 p=0.12
+05:37:02   train e7 [ 700/2204] loss 0.1720 iou 0.7417 p=0.60
+05:37:46   train e7 [ 750/2204] loss 0.1575 iou 0.6453 p=0.64
+05:38:30   train e7 [ 800/2204] loss 0.1620 iou 0.7615 p=0.39
+05:39:14   train e7 [ 850/2204] loss 0.1429 iou 0.7237 p=0.22
+05:39:57   train e7 [ 900/2204] loss 0.1213 iou 0.8202 p=0.51
+05:40:40   train e7 [ 950/2204] loss 0.1503 iou 0.7121 p=0.19
+05:41:23   train e7 [1000/2204] loss 0.1326 iou 0.7274 p=0.32
+05:42:07   train e7 [1050/2204] loss 0.2724 iou 0.4523 p=0.43
+05:42:50   train e7 [1100/2204] loss 0.2302 iou 0.6619 p=0.69
+05:43:33   train e7 [1150/2204] loss 0.2229 iou 0.5866 p=0.16
+05:44:17   train e7 [1200/2204] loss 0.2608 iou 0.5334 p=0.65
+05:45:01   train e7 [1250/2204] loss 0.1794 iou 0.6453 p=0.44
+05:45:44   train e7 [1300/2204] loss 0.1942 iou 0.6639 p=0.56
+05:46:28   train e7 [1350/2204] loss 0.4170 iou 0.3805 p=0.16
+05:47:11   train e7 [1400/2204] loss 0.1409 iou 0.7329 p=0.66
+05:47:54   train e7 [1450/2204] loss 0.1351 iou 0.7395 p=0.28
+05:48:37   train e7 [1500/2204] loss 0.1417 iou 0.7054 p=0.42
+05:49:21   train e7 [1550/2204] loss 0.2493 iou 0.6087 p=0.57
+05:50:05   train e7 [1600/2204] loss 0.3000 iou 0.5011 p=0.57
+05:50:48   train e7 [1650/2204] loss 0.0515 iou 0.9489 p=0.48
+05:51:31   train e7 [1700/2204] loss 0.2119 iou 0.6131 p=0.55
+05:52:13   train e7 [1750/2204] loss 0.1446 iou 0.6984 p=0.63
+05:52:56   train e7 [1800/2204] loss 0.1802 iou 0.7297 p=0.58
+05:53:40   train e7 [1850/2204] loss 0.1003 iou 0.7739 p=0.45
+05:54:23   train e7 [1900/2204] loss 0.0781 iou 0.8629 p=0.31
+05:55:07   train e7 [1950/2204] loss 0.2113 iou 0.6072 p=0.19
+05:55:50   train e7 [2000/2204] loss 0.1138 iou 0.8788 p=0.54
+05:56:34   train e7 [2050/2204] loss 0.1401 iou 0.7525 p=0.24
+05:57:17   train e7 [2100/2204] loss 0.1577 iou 0.7372 p=0.65
+05:58:01   train e7 [2150/2204] loss 0.2539 iou 0.4891 p=0.57
+05:58:44   train e7 [2200/2204] loss 0.0686 iou 0.9051 p=0.39
+05:58:47 train e7  loss 0.1700 iou_fused 0.7112  1912s  zero-grad frames 13
+05:58:48   val   e7 [   0/223] loss 0.1766 iou 0.6261 p=0.37
+05:59:26   val   e7 [  50/223] loss 0.3191 iou 0.6345 p=0.41
+06:00:03   val   e7 [ 100/223] loss 0.2999 iou 0.5613 p=0.68
+06:00:40   val   e7 [ 150/223] loss 0.0392 iou 0.9451 p=0.59
+06:01:16   val   e7 [ 200/223] loss 0.2914 iou 0.6232 p=0.57
+06:01:32   val e7  loss 0.2585 iou_fused 0.6587 (best-of-3 0.7412)  boxed 0.56  by_t [0.682, 0.664, 0.666, 0.665, 0.667, 0.662, 0.639, 0.625]  by_kind {'cond': 0.682, 'prompted': 0.611, 'dropout': 0.713}
+06:01:34   train e8 [   0/2204] loss 0.1878 iou 0.7507 p=0.10
+06:02:17   train e8 [  50/2204] loss 0.2637 iou 0.6073 p=0.11
+06:03:00   train e8 [ 100/2204] loss 0.1583 iou 0.6997 p=0.30
+06:03:44   train e8 [ 150/2204] loss 0.1091 iou 0.8411 p=0.62
+06:04:27   train e8 [ 200/2204] loss 0.1802 iou 0.7546 p=0.34
+06:05:11   train e8 [ 250/2204] loss 0.1131 iou 0.7927 p=0.34
+06:05:55   train e8 [ 300/2204] loss 0.1773 iou 0.6552 p=0.11
+06:06:38   train e8 [ 350/2204] loss 0.1913 iou 0.5662 p=0.41
+06:07:22   train e8 [ 400/2204] loss 0.1477 iou 0.7309 p=0.46
+06:08:05   train e8 [ 450/2204] loss 0.2663 iou 0.5520 p=0.14
+06:08:48   train e8 [ 500/2204] loss 0.1888 iou 0.5763 p=0.38
+06:09:31   train e8 [ 550/2204] loss 0.2529 iou 0.6657 p=0.50
+06:10:15   train e8 [ 600/2204] loss 0.2550 iou 0.5877 p=0.43
+06:10:59   train e8 [ 650/2204] loss 0.2548 iou 0.5366 p=0.16
+06:11:42   train e8 [ 700/2204] loss 0.1192 iou 0.7611 p=0.59
+06:12:26   train e8 [ 750/2204] loss 0.2105 iou 0.7082 p=0.58
+06:13:10   train e8 [ 800/2204] loss 0.1572 iou 0.6846 p=0.68
+06:13:53   train e8 [ 850/2204] loss 0.2503 iou 0.5130 p=0.46
+06:14:37   train e8 [ 900/2204] loss 0.1004 iou 0.8235 p=0.36
+06:15:20   train e8 [ 950/2204] loss 0.1358 iou 0.7946 p=0.65
+06:16:04   train e8 [1000/2204] loss 0.3794 iou 0.4531 p=0.45
+06:16:47   train e8 [1050/2204] loss 0.0427 iou 0.9550 p=0.20
+06:17:31   train e8 [1100/2204] loss 0.3454 iou 0.5563 p=0.12
+06:18:15   train e8 [1150/2204] loss 0.1805 iou 0.6047 p=0.63
+06:18:58   train e8 [1200/2204] loss 0.2863 iou 0.5493 p=0.30
+06:19:42   train e8 [1250/2204] loss 0.1110 iou 0.7992 p=0.39
+06:20:25   train e8 [1300/2204] loss 0.3789 iou 0.6162 p=0.24
+06:21:09   train e8 [1350/2204] loss 0.1483 iou 0.7964 p=0.42
+06:21:53   train e8 [1400/2204] loss 0.1811 iou 0.6942 p=0.40
+06:22:36   train e8 [1450/2204] loss 0.3401 iou 0.4995 p=0.15
+06:23:19   train e8 [1500/2204] loss 0.0667 iou 0.8584 p=0.17
+06:24:03   train e8 [1550/2204] loss 0.4473 iou 0.3522 p=0.31
+06:24:46   train e8 [1600/2204] loss 0.1702 iou 0.6672 p=0.30
+06:25:29   train e8 [1650/2204] loss 0.1099 iou 0.8309 p=0.53
+06:26:12   train e8 [1700/2204] loss 0.1761 iou 0.6194 p=0.40
+06:26:56   train e8 [1750/2204] loss 0.1622 iou 0.7716 p=0.68
+06:27:40   train e8 [1800/2204] loss 0.2018 iou 0.7263 p=0.68
+06:28:23   train e8 [1850/2204] loss 0.2501 iou 0.6002 p=0.18
+06:29:06   train e8 [1900/2204] loss 0.1313 iou 0.7500 p=0.41
+06:29:50   train e8 [1950/2204] loss 0.1194 iou 0.8555 p=0.51
+06:30:33   train e8 [2000/2204] loss 0.2218 iou 0.6225 p=0.49
+06:31:17   train e8 [2050/2204] loss 0.1461 iou 0.7429 p=0.61
+06:32:00   train e8 [2100/2204] loss 0.1257 iou 0.7587 p=0.40
+06:32:43   train e8 [2150/2204] loss 0.1268 iou 0.7952 p=0.36
+06:33:27   train e8 [2200/2204] loss 0.1110 iou 0.7972 p=0.50
+06:33:29 train e8  loss 0.1658 iou_fused 0.7156  1917s  zero-grad frames 20
+06:33:31   val   e8 [   0/223] loss 0.1848 iou 0.6234 p=0.23
+06:34:09   val   e8 [  50/223] loss 0.3204 iou 0.6348 p=0.67
+06:34:45   val   e8 [ 100/223] loss 0.2992 iou 0.5769 p=0.20
+06:35:22   val   e8 [ 150/223] loss 0.0388 iou 0.9455 p=0.27
+06:35:58   val   e8 [ 200/223] loss 0.2923 iou 0.6349 p=0.50
+06:36:15   val e8  loss 0.2580 iou_fused 0.6612 (best-of-3 0.7421)  boxed 0.56  by_t [0.682, 0.667, 0.666, 0.668, 0.667, 0.666, 0.646, 0.627]  by_kind {'cond': 0.682, 'prompted': 0.614, 'dropout': 0.714}
+06:36:16 done. best iou_fused 0.6795 at epoch 2
+train.sh: finalizing 20260926_085719Z_hardkeep (GT test set, experiments/20260926_085719Z_hardkeep/, commit, push)
+finalize: scoring the GT test set: /home/rileydaggs/projects/video-ft/.venv/bin/python /home/rileydaggs/projects/video-ft/scripts/eval_video.py --run /home/rileydaggs/projects/video-ft/ckpts/20260926_085719Z_hardkeep
+06:36:19 GT test set for 20260926_085719Z_hardkeep
+06:36:19   /home/rileydaggs/data/segmentation-test-set-new: 27 incidents, 449 clips, modes prompt_every_frame, keyframe, conditional
+06:36:19   cache_key 76b304dfd677adb6
+06:36:19   init: cached at /data3/rileydaggs/sam3-video-cvf/eval_cache/gt_test_set/76b304dfd677adb6/init-a8abf122abc3d90f
+06:36:20   init      prompt_every_frame iou_fused 0.5744  iou_polygon 0.5611  by_t [0.635, 0.603, 0.604, 0.585, 0.568, 0.552, 0.531, 0.518]
+06:36:20   init      keyframe           iou_fused 0.5253  iou_polygon 0.5057  by_t [0.635, 0.579, 0.561, 0.541, 0.517, 0.492, 0.454, 0.424]
+06:36:20   init      conditional        iou_fused 0.5621  iou_polygon 0.5462  by_t [0.635, 0.595, 0.594, 0.573, 0.557, 0.538, 0.51, 0.495]
+06:36:20   finetuned: scoring (not scored yet)
+/home/rileydaggs/projects/video-ft/sam3/sam3/model_builder.py:8: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+/home/rileydaggs/projects/video-ft/.venv/lib/python3.12/site-packages/timm/models/layers/__init__.py:49: FutureWarning: Importing from timm.models.layers is deprecated, please import via timm.layers
+  warnings.warn(f"Importing from {__name__} is deprecated, please import via timm.layers", FutureWarning)
+06:36:37 base weights: 1068 tensors from sam3.pt (295 unexpected)
+06:36:38 tracker prepared: num_maskmem=7 max_cond=2 keep_first=True dropout=0.00 (16 modules, 8 attn) grad_ckpt=False
+06:36:41   [   0/449] 1022308_ec-100-4_1488412_1489090:m0:f10
+06:37:11   [  25/449] 1022308_ec-164-3_1243865_1244543:m0:f40
+06:37:37   [  50/449] 1029713_ec-241-0_1053975_1054375:m0:f71
+06:38:09   [  75/449] 1056185_ec-449-3_452383_453906:m0:f40
+06:38:39   [ 100/449] 1065181_ec-430-1_483996_485055:m0:f43
+06:39:12   [ 125/449] 1065181_ec-437-3_476575_477634:m0:f34
+06:39:38   [ 150/449] 1083899_ec-223-1_1147452_1147706:m0:f56
+06:40:10   [ 175/449] 1090875_ec-349-3_648246_648337:m0:f33
+06:40:37   [ 200/449] 1099811_ec-434-2_496807_497486:m0:f49
+06:41:03   [ 225/449] 1160106_ec-339-4_723141_723325:m0:f16
+06:41:42   [ 250/449] 1160106_ec-353-0_669795_669979:m0:f43
+06:42:09   [ 275/449] 1217888_ec-214-4_1190735_1190957:m0:f25
+06:42:34   [ 300/449] 1662246_ec-331-6_862450_863051:m0:f8
+06:43:01   [ 325/449] 1664523_ec-131-6_1522075_1522607:m0:f45
+06:43:18   [ 350/449] 1664523_ec-137-4_1467502_1468034:m0:f92
+06:43:48   [ 375/449] 318935_ec-95-0_1211472_1211508:m0:f22
+06:44:21   [ 400/449] 328226_ec-95-2_1221265_1221725:m0:f15
+06:44:47   [ 425/449] 3_279_04042026_ec-279-7_952470_953591:m0:f70
+06:45:13   finetuned prompt_every_frame iou_fused 0.6224  iou_polygon 0.6082  by_t [0.634, 0.642, 0.64, 0.633, 0.621, 0.616, 0.598, 0.596]
+06:45:13   finetuned keyframe           iou_fused 0.5684  iou_polygon 0.5554  by_t [0.634, 0.608, 0.594, 0.584, 0.564, 0.551, 0.519, 0.494]
+06:45:13   finetuned conditional        iou_fused 0.6068  iou_polygon 0.5928  by_t [0.634, 0.628, 0.618, 0.618, 0.606, 0.598, 0.579, 0.574]
+run_name: 20260926_085719Z_hardkeep
+GT test set /home/rileydaggs/data/segmentation-test-set-new
+  27 incidents, 449 clips, 3592 (clip, t) samples per mode   cache_key 76b304dfd677adb6
+  finetuned: /home/rileydaggs/projects/video-ft/ckpts/20260926_085719Z_hardkeep/best.pt
+  held out: 0 trained incidents, 0 shared cameras
+
+HEADLINE  (mean over (clip, t) samples; best-of-3 is the GT-picked candidate, an oracle)
++-----------------+--------------------+-----------+---------+------------+--------------+-------------+---------+-----------+
+| arm             | mode               | IoU fused | delta   | prec fused | recall fused | IoU polygon | delta   | best-of-3 |
++-----------------+--------------------+-----------+---------+------------+--------------+-------------+---------+-----------+
+| init (baseline) | prompt_every_frame | 0.5744    | —       | 0.7093     | 0.7692       | 0.5611      | —       | 0.6401    |
+| init (baseline) | keyframe           | 0.5253    | —       | 0.7150     | 0.6794       | 0.5057      | —       | 0.6090    |
+| init (baseline) | conditional        | 0.5621    | —       | 0.7181     | 0.7451       | 0.5462      | —       | 0.6395    |
+| finetuned       | prompt_every_frame | 0.6224    | +0.0480 | 0.7522     | 0.7942       | 0.6082      | +0.0471 | 0.7029    |
+| finetuned       | keyframe           | 0.5684    | +0.0431 | 0.7003     | 0.7649       | 0.5554      | +0.0497 | 0.6684    |
+| finetuned       | conditional        | 0.6068    | +0.0448 | 0.7415     | 0.7870       | 0.5928      | +0.0466 | 0.6965    |
++-----------------+--------------------+-----------+---------+------------+--------------+-------------+---------+-----------+
+
+iou_fused BY CLIP POSITION t  (a memory bug is a monotone decay in t)
++-----------+--------------------+-------+-------+-------+-------+-------+-------+-------+-------+-----------+--------+
+| arm       | mode               | t0    | t1    | t2    | t3    | t4    | t5    | t6    | t7    | t1-7 mean | t7-t1  |
++-----------+--------------------+-------+-------+-------+-------+-------+-------+-------+-------+-----------+--------+
+| init      | prompt_every_frame | 0.635 | 0.603 | 0.604 | 0.585 | 0.568 | 0.552 | 0.531 | 0.518 | 0.566     | -0.085 |
+| init      | keyframe           | 0.635 | 0.579 | 0.561 | 0.541 | 0.517 | 0.492 | 0.454 | 0.424 | 0.510     | -0.155 |
+| init      | conditional        | 0.635 | 0.595 | 0.594 | 0.573 | 0.557 | 0.538 | 0.510 | 0.495 | 0.552     | -0.100 |
+| finetuned | prompt_every_frame | 0.634 | 0.642 | 0.640 | 0.633 | 0.621 | 0.616 | 0.598 | 0.596 | 0.621     | -0.045 |
+| finetuned | keyframe           | 0.634 | 0.608 | 0.594 | 0.584 | 0.564 | 0.551 | 0.519 | 0.494 | 0.559     | -0.113 |
+| finetuned | conditional        | 0.634 | 0.628 | 0.618 | 0.618 | 0.606 | 0.598 | 0.579 | 0.574 | 0.603     | -0.054 |
++-----------+--------------------+-------+-------+-------+-------+-------+-------+-------+-------+-----------+--------+
+
+iou_fused BY FRAME KIND
++-----------+--------------------+-------+----------+------------+
+| arm       | mode               | cond  | prompted | propagated |
++-----------+--------------------+-------+----------+------------+
+| init      | prompt_every_frame | 0.635 | 0.566    | —          |
+| init      | keyframe           | 0.635 | —        | 0.510      |
+| init      | conditional        | 0.635 | 0.450    | 0.672      |
+| finetuned | prompt_every_frame | 0.634 | 0.621    | —          |
+| finetuned | keyframe           | 0.634 | —        | 0.559      |
+| finetuned | conditional        | 0.634 | 0.519    | 0.672      |
++-----------+--------------------+-------+----------+------------+
+
+TRACK METRICS  (continuity = IoU of consecutive predicted masks; lost = presence head <= 0 on a GT-positive frame)
++-----------+--------------------+------------+---------------+-----------+---------------+
+| arm       | mode               | continuity | GT continuity | lost frac | restarts/clip |
++-----------+--------------------+------------+---------------+-----------+---------------+
+| init      | prompt_every_frame | 0.646      | 0.513         | 0.000     | 0.00          |
+| init      | keyframe           | 0.644      | 0.513         | 0.013     | 0.00          |
+| init      | conditional        | 0.632      | 0.513         | 0.000     | 3.79          |
+| finetuned | prompt_every_frame | 0.601      | 0.513         | 0.000     | 0.00          |
+| finetuned | keyframe           | 0.629      | 0.513         | 0.000     | 0.00          |
+| finetuned | conditional        | 0.591      | 0.513         | 0.000     | 3.16          |
++-----------+--------------------+------------+---------------+-----------+---------------+
+
+PER INCIDENT  (conditional, iou_fused, worst baseline first)
++---------------------------------------+-----+--------+-----------+---------+------------+
+| incident                              | n   | init   | finetuned | delta   | samples up |
++---------------------------------------+-----+--------+-----------+---------+------------+
+| 324356_ec-325-2_260561_260670         | 144 | 0.2034 | 0.2932    | +0.0898 | 86/144     |
+| 318935_ec-95-0_1211472_1211508        | 104 | 0.2613 | 0.3467    | +0.0853 | 77/104     |
+| 1849472_ec-566-2_521498_522604        | 128 | 0.2883 | 0.4215    | +0.1332 | 102/128    |
+| 1160106_ec-339-4_723141_723325        | 144 | 0.3269 | 0.3581    | +0.0312 | 55/144     |
+| 3_279_04042026_ec-279-7_952470_953591 | 144 | 0.3384 | 0.3697    | +0.0313 | 74/144     |
+| 1160106_ec-353-0_669795_669979        | 144 | 0.4162 | 0.6153    | +0.1991 | 124/144    |
+| 1217888_ec-214-4_1190735_1190957      | 112 | 0.4278 | 0.5317    | +0.1039 | 84/112     |
+| 1099811_ec-434-2_496807_497486        | 144 | 0.4442 | 0.5176    | +0.0735 | 107/144    |
+| 1022308_ec-100-4_1488412_1489090      | 144 | 0.4498 | 0.6334    | +0.1836 | 117/144    |
+| 1045318_ec-201-1_1193662_1194160      | 112 | 0.4933 | 0.4516    | -0.0417 | 44/112     |
+| 1664523_ec-137-4_1467502_1468034      | 144 | 0.4935 | 0.5334    | +0.0399 | 94/144     |
+| 328226_ec-95-2_1221265_1221725        | 144 | 0.5209 | 0.4506    | -0.0703 | 52/144     |
+| 1029713_ec-241-0_1053975_1054375      | 144 | 0.5336 | 0.5571    | +0.0236 | 80/144     |
+| 1022308_ec-164-3_1243865_1244543      | 144 | 0.5755 | 0.6673    | +0.0918 | 91/144     |
+| 1664350_ec-481-7_573433_574094        | 120 | 0.5806 | 0.6009    | +0.0203 | 78/120     |
+| 1664523_ec-131-6_1522075_1522607      | 144 | 0.5807 | 0.6010    | +0.0203 | 78/144     |
+| 1662246_ec-331-6_862450_863051        | 144 | 0.6587 | 0.7122    | +0.0535 | 88/144     |
+| 1083899_ec-223-1_1147452_1147706      | 144 | 0.6726 | 0.7584    | +0.0857 | 116/144    |
+| 1065181_ec-430-1_483996_485055        | 128 | 0.6799 | 0.6481    | -0.0318 | 49/128     |
+| 1090875_ec-340-0_699898_699990        | 112 | 0.7144 | 0.7858    | +0.0714 | 76/112     |
+| 1179436_ec-258-3_1005013_1005094      | 72  | 0.7186 | 0.7962    | +0.0777 | 50/72      |
+| 1090875_ec-349-3_648246_648337        | 144 | 0.7324 | 0.6928    | -0.0396 | 45/144     |
+| 1056185_ec-449-3_452383_453906        | 144 | 0.7480 | 0.6760    | -0.0719 | 38/144     |
+| 1138080_ec-415-0_521498_522465        | 144 | 0.8018 | 0.8143    | +0.0125 | 79/144     |
+| 1065181_ec-437-2_476575_477634        | 144 | 0.8277 | 0.8620    | +0.0343 | 68/144     |
+| 1065181_ec-437-3_476575_477634        | 144 | 0.8512 | 0.8574    | +0.0062 | 90/144     |
+| 921196_ec-164-0_1196724_1196907       | 112 | 0.8749 | 0.8892    | +0.0143 | 71/112     |
++---------------------------------------+-----+--------+-----------+---------+------------+
+
+WORST SINGLE FRAME IN EACH  (finetuned, conditional, iou_fused; lowest IoU, ties to the biggest GT plume)
++---------------------------------------+---+-------+-------+-------+--------+---------+----------+
+| incident                              | t | frame | IoU   | prec  | recall | GT px   | SAM 3 px |
++---------------------------------------+---+-------+-------+-------+--------+---------+----------+
+| 1217888_ec-214-4_1190735_1190957      | 4 | 24    | 0.000 | 0.000 | 0.000  | 153,630 | 22,674   |
+| 1849472_ec-566-2_521498_522604        | 2 | 41    | 0.000 | 0.000 | 0.000  | 4,082   | 21,817   |
+| 1065181_ec-437-2_476575_477634        | 0 | 2     | 0.000 | 0.000 | 0.000  | 0       | 97       |
+| 1160106_ec-339-4_723141_723325        | 0 | 10    | 0.000 | 0.000 | 0.000  | 0       | 229      |
+| 324356_ec-325-2_260561_260670         | 0 | 1     | 0.000 | 0.000 | 0.000  | 0       | 1,547    |
+| 3_279_04042026_ec-279-7_952470_953591 | 0 | 22    | 0.000 | 0.000 | 0.000  | 0       | 143      |
+| 1664523_ec-137-4_1467502_1468034      | 0 | 69    | 0.037 | 0.038 | 0.744  | 1,518   | 29,828   |
+| 318935_ec-95-0_1211472_1211508        | 0 | 24    | 0.039 | 0.039 | 0.896  | 862     | 19,659   |
+| 328226_ec-95-2_1221265_1221725        | 3 | 27    | 0.068 | 0.068 | 1.000  | 1,749   | 25,896   |
+| 1664350_ec-481-7_573433_574094        | 4 | 36    | 0.097 | 0.100 | 0.715  | 2,577   | 18,364   |
+| 1045318_ec-201-1_1193662_1194160      | 6 | 41    | 0.099 | 0.118 | 0.387  | 16,190  | 53,328   |
+| 1160106_ec-353-0_669795_669979        | 1 | 53    | 0.117 | 0.120 | 0.873  | 14,456  | 105,557  |
+| 1664523_ec-131-6_1522075_1522607      | 2 | 46    | 0.164 | 0.164 | 0.995  | 9,628   | 58,360   |
+| 1099811_ec-434-2_496807_497486        | 0 | 49    | 0.173 | 0.593 | 0.196  | 101,216 | 33,471   |
+| 1029713_ec-241-0_1053975_1054375      | 1 | 71    | 0.205 | 0.257 | 0.505  | 14,620  | 28,751   |
+| 1138080_ec-415-0_521498_522465        | 0 | 29    | 0.219 | 0.222 | 0.943  | 1,461   | 6,201    |
+| 1662246_ec-331-6_862450_863051        | 1 | 8     | 0.245 | 0.467 | 0.341  | 270     | 197      |
+| 1056185_ec-449-3_452383_453906        | 7 | 60    | 0.246 | 0.751 | 0.268  | 75,839  | 27,073   |
+| 1090875_ec-340-0_699898_699990        | 0 | 2     | 0.253 | 0.281 | 0.719  | 310     | 793      |
+| 1083899_ec-223-1_1147452_1147706      | 0 | 43    | 0.275 | 0.906 | 0.283  | 48,374  | 15,096   |
+| 1065181_ec-430-1_483996_485055        | 0 | 22    | 0.290 | 0.291 | 0.988  | 41,908  | 142,504  |
+| 1065181_ec-437-3_476575_477634        | 0 | 2     | 0.333 | 0.880 | 0.349  | 4,433   | 1,756    |
+| 1022308_ec-164-3_1243865_1244543      | 0 | 34    | 0.333 | 0.973 | 0.337  | 86,123  | 29,812   |
+| 1022308_ec-100-4_1488412_1489090      | 7 | 65    | 0.335 | 0.342 | 0.943  | 8,032   | 22,142   |
+| 1090875_ec-349-3_648246_648337        | 7 | 61    | 0.339 | 0.701 | 0.396  | 103,933 | 58,684   |
+| 1179436_ec-258-3_1005013_1005094      | 1 | 6     | 0.575 | 0.576 | 0.998  | 10,840  | 18,789   |
+| 921196_ec-164-0_1196724_1196907       | 6 | 30    | 0.789 | 0.852 | 0.915  | 78,724  | 84,563   |
++---------------------------------------+---+-------+-------+-------+--------+---------+----------+
+
+06:45:13 wrote /home/rileydaggs/projects/video-ft/ckpts/20260926_085719Z_hardkeep/gt_test_set
+finalize: GT test set ok (scored just now)
+finalize: scoring the GT test set: /home/rileydaggs/projects/video-ft/.venv/bin/python /home/rileydaggs/projects/video-ft/scripts/eval_video.py --run /home/rileydaggs/projects/video-ft/ckpts/20260926_085719Z_hardkeep --box-jitter 0.5,2.0
+06:45:17 GT test set for 20260926_085719Z_hardkeep
+06:45:17   /home/rileydaggs/data/segmentation-test-set-new: 27 incidents, 449 clips, modes prompt_every_frame, keyframe, conditional
+06:45:17   cache_key 9d573f4124722573
+06:45:17   init: cached at /data3/rileydaggs/sam3-video-cvf/eval_cache/gt_test_set/9d573f4124722573/init-a8abf122abc3d90f
+06:45:18   init      prompt_every_frame iou_fused 0.4606  iou_polygon 0.4356  by_t [0.469, 0.478, 0.479, 0.478, 0.465, 0.453, 0.444, 0.418]
+06:45:18   init      keyframe           iou_fused 0.4532  iou_polygon 0.4243  by_t [0.469, 0.488, 0.485, 0.476, 0.465, 0.438, 0.415, 0.39]
+06:45:18   init      conditional        iou_fused 0.4607  iou_polygon 0.4356  by_t [0.469, 0.479, 0.479, 0.478, 0.466, 0.453, 0.443, 0.418]
+06:45:18   finetuned: scoring (not scored yet)
+/home/rileydaggs/projects/video-ft/sam3/sam3/model_builder.py:8: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+/home/rileydaggs/projects/video-ft/.venv/lib/python3.12/site-packages/timm/models/layers/__init__.py:49: FutureWarning: Importing from timm.models.layers is deprecated, please import via timm.layers
+  warnings.warn(f"Importing from {__name__} is deprecated, please import via timm.layers", FutureWarning)
+06:45:35 base weights: 1068 tensors from sam3.pt (295 unexpected)
+06:45:35 tracker prepared: num_maskmem=7 max_cond=2 keep_first=True dropout=0.00 (16 modules, 8 attn) grad_ckpt=False
+06:45:40   [   0/449] 1022308_ec-100-4_1488412_1489090:m0:f10
+06:46:16   [  25/449] 1022308_ec-164-3_1243865_1244543:m0:f40
+06:46:45   [  50/449] 1029713_ec-241-0_1053975_1054375:m0:f71
+06:47:20   [  75/449] 1056185_ec-449-3_452383_453906:m0:f40
+06:47:57   [ 100/449] 1065181_ec-430-1_483996_485055:m0:f43
+06:48:34   [ 125/449] 1065181_ec-437-3_476575_477634:m0:f34
+06:49:11   [ 150/449] 1083899_ec-223-1_1147452_1147706:m0:f56
+06:49:52   [ 175/449] 1090875_ec-349-3_648246_648337:m0:f33
+06:50:30   [ 200/449] 1099811_ec-434-2_496807_497486:m0:f49
+06:51:08   [ 225/449] 1160106_ec-339-4_723141_723325:m0:f16
+06:51:47   [ 250/449] 1160106_ec-353-0_669795_669979:m0:f43
+06:52:21   [ 275/449] 1217888_ec-214-4_1190735_1190957:m0:f25
+06:52:55   [ 300/449] 1662246_ec-331-6_862450_863051:m0:f8
+06:53:29   [ 325/449] 1664523_ec-131-6_1522075_1522607:m0:f45
+06:53:54   [ 350/449] 1664523_ec-137-4_1467502_1468034:m0:f92
+06:54:28   [ 375/449] 318935_ec-95-0_1211472_1211508:m0:f22
+06:55:02   [ 400/449] 328226_ec-95-2_1221265_1221725:m0:f15
+06:55:31   [ 425/449] 3_279_04042026_ec-279-7_952470_953591:m0:f70
+06:56:08   finetuned prompt_every_frame iou_fused 0.5199  iou_polygon 0.4884  by_t [0.488, 0.526, 0.532, 0.54, 0.529, 0.524, 0.512, 0.507]
+06:56:08   finetuned keyframe           iou_fused 0.5094  iou_polygon 0.4764  by_t [0.488, 0.536, 0.536, 0.537, 0.523, 0.512, 0.484, 0.458]
+06:56:08   finetuned conditional        iou_fused 0.5193  iou_polygon 0.4881  by_t [0.488, 0.526, 0.533, 0.54, 0.529, 0.523, 0.511, 0.505]
+run_name: 20260926_085719Z_hardkeep
+GT test set /home/rileydaggs/data/segmentation-test-set-new
+  27 incidents, 449 clips, 3592 (clip, t) samples per mode   cache_key 9d573f4124722573
+  finetuned: /home/rileydaggs/projects/video-ft/ckpts/20260926_085719Z_hardkeep/best.pt
+  held out: 0 trained incidents, 0 shared cameras
+  BOX JITTER: every prompt box padded per axis by p ~ U(0.5, 2.0), seeded per frame — the same boxes for every run
+
+HEADLINE  (mean over (clip, t) samples; best-of-3 is the GT-picked candidate, an oracle)
++-----------------+--------------------+-----------+---------+------------+--------------+-------------+---------+-----------+
+| arm             | mode               | IoU fused | delta   | prec fused | recall fused | IoU polygon | delta   | best-of-3 |
++-----------------+--------------------+-----------+---------+------------+--------------+-------------+---------+-----------+
+| init (baseline) | prompt_every_frame | 0.4606    | —       | 0.5204     | 0.8608       | 0.4356      | —       | 0.5278    |
+| init (baseline) | keyframe           | 0.4532    | —       | 0.5507     | 0.7782       | 0.4243      | —       | 0.5353    |
+| init (baseline) | conditional        | 0.4607    | —       | 0.5208     | 0.8598       | 0.4356      | —       | 0.5295    |
+| finetuned       | prompt_every_frame | 0.5199    | +0.0593 | 0.5868     | 0.8637       | 0.4884      | +0.0528 | 0.6234    |
+| finetuned       | keyframe           | 0.5094    | +0.0562 | 0.5926     | 0.8168       | 0.4764      | +0.0520 | 0.6237    |
+| finetuned       | conditional        | 0.5193    | +0.0586 | 0.5864     | 0.8634       | 0.4881      | +0.0525 | 0.6262    |
++-----------------+--------------------+-----------+---------+------------+--------------+-------------+---------+-----------+
+
+iou_fused BY CLIP POSITION t  (a memory bug is a monotone decay in t)
++-----------+--------------------+-------+-------+-------+-------+-------+-------+-------+-------+-----------+--------+
+| arm       | mode               | t0    | t1    | t2    | t3    | t4    | t5    | t6    | t7    | t1-7 mean | t7-t1  |
++-----------+--------------------+-------+-------+-------+-------+-------+-------+-------+-------+-----------+--------+
+| init      | prompt_every_frame | 0.469 | 0.478 | 0.479 | 0.478 | 0.465 | 0.453 | 0.444 | 0.418 | 0.459     | -0.060 |
+| init      | keyframe           | 0.469 | 0.488 | 0.485 | 0.476 | 0.465 | 0.438 | 0.415 | 0.390 | 0.451     | -0.098 |
+| init      | conditional        | 0.469 | 0.479 | 0.479 | 0.478 | 0.466 | 0.453 | 0.443 | 0.418 | 0.459     | -0.060 |
+| finetuned | prompt_every_frame | 0.488 | 0.526 | 0.532 | 0.540 | 0.529 | 0.524 | 0.512 | 0.507 | 0.524     | -0.019 |
+| finetuned | keyframe           | 0.488 | 0.536 | 0.536 | 0.537 | 0.523 | 0.512 | 0.484 | 0.458 | 0.512     | -0.079 |
+| finetuned | conditional        | 0.488 | 0.526 | 0.533 | 0.540 | 0.529 | 0.523 | 0.511 | 0.505 | 0.524     | -0.021 |
++-----------+--------------------+-------+-------+-------+-------+-------+-------+-------+-------+-----------+--------+
+
+iou_fused BY FRAME KIND
++-----------+--------------------+-------+----------+------------+
+| arm       | mode               | cond  | prompted | propagated |
++-----------+--------------------+-------+----------+------------+
+| init      | prompt_every_frame | 0.469 | 0.459    | —          |
+| init      | keyframe           | 0.469 | —        | 0.451      |
+| init      | conditional        | 0.469 | 0.476    | 0.277      |
+| finetuned | prompt_every_frame | 0.488 | 0.524    | —          |
+| finetuned | keyframe           | 0.488 | —        | 0.512      |
+| finetuned | conditional        | 0.488 | 0.529    | 0.399      |
++-----------+--------------------+-------+----------+------------+
+
+TRACK METRICS  (continuity = IoU of consecutive predicted masks; lost = presence head <= 0 on a GT-positive frame)
++-----------+--------------------+------------+---------------+-----------+---------------+
+| arm       | mode               | continuity | GT continuity | lost frac | restarts/clip |
++-----------+--------------------+------------+---------------+-----------+---------------+
+| init      | prompt_every_frame | 0.700      | 0.507         | 0.000     | 0.00          |
+| init      | keyframe           | 0.700      | 0.507         | 0.007     | 0.00          |
+| init      | conditional        | 0.699      | 0.507         | 0.000     | 6.41          |
+| finetuned | prompt_every_frame | 0.622      | 0.507         | 0.000     | 0.00          |
+| finetuned | keyframe           | 0.648      | 0.507         | 0.000     | 0.00          |
+| finetuned | conditional        | 0.621      | 0.507         | 0.000     | 6.71          |
++-----------+--------------------+------------+---------------+-----------+---------------+
+
+PER INCIDENT  (conditional, iou_fused, worst baseline first)
++---------------------------------------+-----+--------+-----------+---------+------------+
+| incident                              | n   | init   | finetuned | delta   | samples up |
++---------------------------------------+-----+--------+-----------+---------+------------+
+| 318935_ec-95-0_1211472_1211508        | 104 | 0.1096 | 0.1126    | +0.0029 | 72/104     |
+| 3_279_04042026_ec-279-7_952470_953591 | 144 | 0.1997 | 0.2050    | +0.0054 | 83/144     |
+| 324356_ec-325-2_260561_260670         | 144 | 0.2009 | 0.3131    | +0.1122 | 126/144    |
+| 1217888_ec-214-4_1190735_1190957      | 112 | 0.2519 | 0.4369    | +0.1849 | 97/112     |
+| 1849472_ec-566-2_521498_522604        | 128 | 0.2584 | 0.3357    | +0.0773 | 101/128    |
+| 1664523_ec-137-4_1467502_1468034      | 144 | 0.2830 | 0.3496    | +0.0666 | 103/144    |
+| 1065181_ec-430-1_483996_485055        | 128 | 0.2848 | 0.3992    | +0.1144 | 97/128     |
+| 1029713_ec-241-0_1053975_1054375      | 144 | 0.2858 | 0.3056    | +0.0198 | 94/144     |
+| 1160106_ec-353-0_669795_669979        | 144 | 0.2870 | 0.4501    | +0.1631 | 132/144    |
+| 1022308_ec-100-4_1488412_1489090      | 144 | 0.3124 | 0.4026    | +0.0902 | 128/144    |
+| 328226_ec-95-2_1221265_1221725        | 144 | 0.3475 | 0.3186    | -0.0289 | 79/144     |
+| 1045318_ec-201-1_1193662_1194160      | 112 | 0.3634 | 0.3676    | +0.0042 | 70/112     |
+| 1160106_ec-339-4_723141_723325        | 144 | 0.3679 | 0.4373    | +0.0694 | 94/144     |
+| 1022308_ec-164-3_1243865_1244543      | 144 | 0.4294 | 0.5417    | +0.1124 | 101/144    |
+| 1664350_ec-481-7_573433_574094        | 120 | 0.4454 | 0.4734    | +0.0280 | 77/120     |
+| 1099811_ec-434-2_496807_497486        | 144 | 0.4873 | 0.5081    | +0.0208 | 62/144     |
+| 1664523_ec-131-6_1522075_1522607      | 144 | 0.4894 | 0.5483    | +0.0590 | 110/144    |
+| 1662246_ec-331-6_862450_863051        | 144 | 0.5441 | 0.6571    | +0.1130 | 127/144    |
+| 1083899_ec-223-1_1147452_1147706      | 144 | 0.5609 | 0.6978    | +0.1369 | 119/144    |
+| 1090875_ec-349-3_648246_648337        | 144 | 0.5674 | 0.6501    | +0.0827 | 108/144    |
+| 1179436_ec-258-3_1005013_1005094      | 72  | 0.6516 | 0.6333    | -0.0183 | 39/72      |
+| 1090875_ec-340-0_699898_699990        | 112 | 0.7189 | 0.7392    | +0.0202 | 68/112     |
+| 1056185_ec-449-3_452383_453906        | 144 | 0.7215 | 0.7058    | -0.0157 | 53/144     |
+| 1138080_ec-415-0_521498_522465        | 144 | 0.8053 | 0.8228    | +0.0174 | 77/144     |
+| 1065181_ec-437-3_476575_477634        | 144 | 0.8201 | 0.8584    | +0.0384 | 110/144    |
+| 921196_ec-164-0_1196724_1196907       | 112 | 0.8346 | 0.8414    | +0.0069 | 67/112     |
+| 1065181_ec-437-2_476575_477634        | 144 | 0.8374 | 0.8818    | +0.0443 | 111/144    |
++---------------------------------------+-----+--------+-----------+---------+------------+
+
+WORST SINGLE FRAME IN EACH  (finetuned, conditional, iou_fused; lowest IoU, ties to the biggest GT plume)
++---------------------------------------+---+-------+-------+-------+--------+--------+----------+
+| incident                              | t | frame | IoU   | prec  | recall | GT px  | SAM 3 px |
++---------------------------------------+---+-------+-------+-------+--------+--------+----------+
+| 3_279_04042026_ec-279-7_952470_953591 | 3 | 62    | 0.000 | 0.000 | 0.000  | 247    | 0        |
+| 318935_ec-95-0_1211472_1211508        | 0 | 26    | 0.000 | 0.000 | 0.000  | 178    | 1,210    |
+| 1065181_ec-437-2_476575_477634        | 0 | 2     | 0.000 | 0.000 | 0.000  | 0      | 358      |
+| 1160106_ec-339-4_723141_723325        | 0 | 4     | 0.000 | 0.000 | 0.000  | 0      | 456      |
+| 1217888_ec-214-4_1190735_1190957      | 4 | 24    | 0.004 | 0.039 | 0.004  | 25,260 | 2,556    |
+| 1664523_ec-137-4_1467502_1468034      | 0 | 69    | 0.014 | 0.014 | 1.000  | 236    | 16,952   |
+| 1849472_ec-566-2_521498_522604        | 0 | 44    | 0.014 | 0.015 | 0.153  | 960    | 9,646    |
+| 324356_ec-325-2_260561_260670         | 3 | 46    | 0.015 | 0.015 | 0.978  | 1,562  | 103,822  |
+| 1160106_ec-353-0_669795_669979        | 0 | 2     | 0.015 | 0.017 | 0.091  | 22     | 115      |
+| 1138080_ec-415-0_521498_522465        | 0 | 29    | 0.036 | 0.036 | 1.000  | 669    | 18,579   |
+| 328226_ec-95-2_1221265_1221725        | 2 | 27    | 0.045 | 0.045 | 1.000  | 700    | 15,566   |
+| 1664350_ec-481-7_573433_574094        | 2 | 36    | 0.047 | 0.047 | 1.000  | 2,037  | 42,891   |
+| 1099811_ec-434-2_496807_497486        | 0 | 1     | 0.048 | 0.048 | 1.000  | 77     | 1,594    |
+| 1022308_ec-164-3_1243865_1244543      | 2 | 38    | 0.051 | 0.235 | 0.061  | 20,644 | 5,367    |
+| 1662246_ec-331-6_862450_863051        | 0 | 2     | 0.063 | 0.063 | 1.000  | 55     | 876      |
+| 1022308_ec-100-4_1488412_1489090      | 6 | 55    | 0.083 | 0.084 | 0.868  | 850    | 8,739    |
+| 1029713_ec-241-0_1053975_1054375      | 4 | 73    | 0.097 | 0.100 | 0.734  | 2,104  | 15,397   |
+| 1045318_ec-201-1_1193662_1194160      | 6 | 41    | 0.100 | 0.117 | 0.403  | 16,204 | 55,576   |
+| 1664523_ec-131-6_1522075_1522607      | 0 | 49    | 0.114 | 0.116 | 0.861  | 6,047  | 44,693   |
+| 1065181_ec-430-1_483996_485055        | 7 | 46    | 0.123 | 0.128 | 0.737  | 24,398 | 140,442  |
+| 1090875_ec-340-0_699898_699990        | 0 | 2     | 0.123 | 0.123 | 1.000  | 253    | 2,060    |
+| 1056185_ec-449-3_452383_453906        | 0 | 2     | 0.183 | 0.187 | 0.888  | 331    | 1,573    |
+| 1179436_ec-258-3_1005013_1005094      | 0 | 1     | 0.209 | 0.210 | 0.961  | 255    | 1,164    |
+| 1083899_ec-223-1_1147452_1147706      | 0 | 8     | 0.212 | 0.212 | 1.000  | 194    | 917      |
+| 1090875_ec-349-3_648246_648337        | 0 | 1     | 0.236 | 0.236 | 1.000  | 751    | 3,184    |
+| 1065181_ec-437-3_476575_477634        | 0 | 8     | 0.409 | 0.415 | 0.966  | 11,279 | 26,254   |
+| 921196_ec-164-0_1196724_1196907       | 7 | 37    | 0.605 | 0.609 | 0.987  | 26,447 | 42,827   |
++---------------------------------------+---+-------+-------+-------+--------+--------+----------+
+
+06:56:09 wrote /home/rileydaggs/projects/video-ft/ckpts/20260926_085719Z_hardkeep/gt_test_set_boxjitter
+finalize: GT test set, jittered boxes ok (scored just now)

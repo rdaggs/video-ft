@@ -1,0 +1,44 @@
+{
+  "note": "best.pt is committed beside this file (`in_git`); the rest stay on /data3 at `path`. A checkpoint is a sparse overlay of requires_grad tensors and loads ON TOP of init_from (see smokeftv.checkpoint).",
+  "init_from": {
+    "path": "/home/rileydaggs/projects/sam3-finetuned-cvf/ckpts_best/L4E-2/best.pt",
+    "sha256": "a8abf122abc3d90fad4f48f910999820edd7a60afddb47894d5e0db87b66cb2a"
+  },
+  "checkpoints": [
+    {
+      "file": "best.pt",
+      "path": "/data3/rileydaggs/sam3-video-cvf/ckpts/20260926_085719Z_hardkeep/best.pt",
+      "bytes": 30130056,
+      "sha256": "f0783ffb2fae8264626b81f227f7509bb40be70a268b85fb189efd9e164433a6",
+      "in_git": "experiments/20260926_085719Z_hardkeep/best.pt",
+      "meta": {
+        "epoch": 2,
+        "run_name": "20260926_085719Z_hardkeep",
+        "select_metric": "iou_fused",
+        "iou_fused": 0.679466744703536
+      }
+    },
+    {
+      "file": "last.pt",
+      "path": "/data3/rileydaggs/sam3-video-cvf/ckpts/20260926_085719Z_hardkeep/last.pt",
+      "bytes": 30130056,
+      "sha256": "1c5e2a1a8ed9ed8967db52f7942a78fe0f1ea80f8b3043461a79bf0bb28b57e9",
+      "in_git": null,
+      "meta": {
+        "epoch": 8,
+        "run_name": "20260926_085719Z_hardkeep"
+      }
+    },
+    {
+      "file": "last_resume.pt",
+      "path": "/data3/rileydaggs/sam3-video-cvf/ckpts/20260926_085719Z_hardkeep/last_resume.pt",
+      "bytes": 60321807,
+      "sha256": "ac672471f019c52b2dc32fe528898c0bc07a06c338049785140dc25595890354",
+      "in_git": null,
+      "meta": {
+        "epoch": 8,
+        "kind": "resume state"
+      }
+    }
+  ]
+}

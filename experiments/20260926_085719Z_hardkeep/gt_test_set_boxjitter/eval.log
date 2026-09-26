@@ -1,0 +1,32 @@
+06:45:17 GT test set for 20260926_085719Z_hardkeep
+06:45:17   /home/rileydaggs/data/segmentation-test-set-new: 27 incidents, 449 clips, modes prompt_every_frame, keyframe, conditional
+06:45:17   cache_key 9d573f4124722573
+06:45:17   init: cached at /data3/rileydaggs/sam3-video-cvf/eval_cache/gt_test_set/9d573f4124722573/init-a8abf122abc3d90f
+06:45:18   init      prompt_every_frame iou_fused 0.4606  iou_polygon 0.4356  by_t [0.469, 0.478, 0.479, 0.478, 0.465, 0.453, 0.444, 0.418]
+06:45:18   init      keyframe           iou_fused 0.4532  iou_polygon 0.4243  by_t [0.469, 0.488, 0.485, 0.476, 0.465, 0.438, 0.415, 0.39]
+06:45:18   init      conditional        iou_fused 0.4607  iou_polygon 0.4356  by_t [0.469, 0.479, 0.479, 0.478, 0.466, 0.453, 0.443, 0.418]
+06:45:18   finetuned: scoring (not scored yet)
+06:45:35 base weights: 1068 tensors from sam3.pt (295 unexpected)
+06:45:35 tracker prepared: num_maskmem=7 max_cond=2 keep_first=True dropout=0.00 (16 modules, 8 attn) grad_ckpt=False
+06:45:40   [   0/449] 1022308_ec-100-4_1488412_1489090:m0:f10
+06:46:16   [  25/449] 1022308_ec-164-3_1243865_1244543:m0:f40
+06:46:45   [  50/449] 1029713_ec-241-0_1053975_1054375:m0:f71
+06:47:20   [  75/449] 1056185_ec-449-3_452383_453906:m0:f40
+06:47:57   [ 100/449] 1065181_ec-430-1_483996_485055:m0:f43
+06:48:34   [ 125/449] 1065181_ec-437-3_476575_477634:m0:f34
+06:49:11   [ 150/449] 1083899_ec-223-1_1147452_1147706:m0:f56
+06:49:52   [ 175/449] 1090875_ec-349-3_648246_648337:m0:f33
+06:50:30   [ 200/449] 1099811_ec-434-2_496807_497486:m0:f49
+06:51:08   [ 225/449] 1160106_ec-339-4_723141_723325:m0:f16
+06:51:47   [ 250/449] 1160106_ec-353-0_669795_669979:m0:f43
+06:52:21   [ 275/449] 1217888_ec-214-4_1190735_1190957:m0:f25
+06:52:55   [ 300/449] 1662246_ec-331-6_862450_863051:m0:f8
+06:53:29   [ 325/449] 1664523_ec-131-6_1522075_1522607:m0:f45
+06:53:54   [ 350/449] 1664523_ec-137-4_1467502_1468034:m0:f92
+06:54:28   [ 375/449] 318935_ec-95-0_1211472_1211508:m0:f22
+06:55:02   [ 400/449] 328226_ec-95-2_1221265_1221725:m0:f15
+06:55:31   [ 425/449] 3_279_04042026_ec-279-7_952470_953591:m0:f70
+06:56:08   finetuned prompt_every_frame iou_fused 0.5199  iou_polygon 0.4884  by_t [0.488, 0.526, 0.532, 0.54, 0.529, 0.524, 0.512, 0.507]
+06:56:08   finetuned keyframe           iou_fused 0.5094  iou_polygon 0.4764  by_t [0.488, 0.536, 0.536, 0.537, 0.523, 0.512, 0.484, 0.458]
+06:56:08   finetuned conditional        iou_fused 0.5193  iou_polygon 0.4881  by_t [0.488, 0.526, 0.533, 0.54, 0.529, 0.523, 0.511, 0.505]
+06:56:09 wrote /home/rileydaggs/projects/video-ft/ckpts/20260926_085719Z_hardkeep/gt_test_set_boxjitter
